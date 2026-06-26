@@ -1,0 +1,17 @@
+# CLion
+.idea/
+
+# CMake build folders
+cmake-build-debug/
+cmake-build-debug-visual-studio/
+
+# Visual Studio
+.vs/
+
+# Executables
+*.exe
+
+# Object files
+*.obj
+*.pdb
+*.ilk
