@@ -1,8 +1,10 @@
+#include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
 void ProcessInput(bool& running, SDL_Event& event);
-void Update(SDL_FRect& playerRect, float playerSpeed);
+void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime,
+    int windowWidth, int windowHeight);
 void Render(SDL_Renderer* renderer,
     SDL_Texture* playerTexture,
     SDL_FRect& playerRect);
@@ -14,10 +16,12 @@ int main() {
     }
 
     //Create the window
+    constexpr int WINDOW_WIDTH = 1000;
+    constexpr int WINDOW_HEIGHT = 800;
     SDL_Window *window = SDL_CreateWindow(
         "Monster Quest",
-        1000,
-        800,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
         0);
     if (!window) {
         SDL_Log("Failed to create window: %s", SDL_GetError());
@@ -63,22 +67,31 @@ int main() {
     }
 
     // Position and size of the sprite
+    constexpr float PLAYER_SIZE = 64.0F;
     SDL_FRect playerRect{
     100.0f,
     100.0f,
-    64.0f,
-    64.0f};
+    PLAYER_SIZE,
+    PLAYER_SIZE};
 
-    float playerSpeed = 10.0f;
+    constexpr float PLAYER_SPEED = 200.0f;
     bool running = true;
 
     SDL_Event event;
 
     // The Game Loop
+    Uint64 previousCounter = SDL_GetPerformanceCounter();
     while (running) {
 
+        Uint64 currentCounter = SDL_GetPerformanceCounter();
+        double deltaTime =
+            static_cast<double>(currentCounter - previousCounter)/
+                SDL_GetPerformanceFrequency();
+        previousCounter = currentCounter;
+
         ProcessInput(running, event);
-        Update(playerRect, playerSpeed);
+        Update(playerRect, PLAYER_SPEED, deltaTime,
+            WINDOW_WIDTH, WINDOW_HEIGHT);
 
         Render(renderer,
             playerTexture,
@@ -101,25 +114,39 @@ void ProcessInput(bool& running, SDL_Event& event) {
             running = false;
         }
     }
-} //done
+} // will update
 
-void Update(SDL_FRect& playerRect, float playerSpeed) {
+void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime,
+    int windowWidth, int windowHeight) {
 
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
 
     if (keyboardStates[SDL_SCANCODE_UP]) {
-        playerRect.y -= playerSpeed;
+        playerRect.y -= playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_DOWN]) {
-        playerRect.y += playerSpeed;
+        playerRect.y += playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_LEFT]) {
-        playerRect.x -= playerSpeed;
+        playerRect.x -= playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_RIGHT]) {
-        playerRect.x += playerSpeed;
+        playerRect.x += playerSpeed * static_cast<float>(deltaTime);
     }
-} //done
+
+    if (playerRect.x < 0.0f) {
+        playerRect.x = 0.0f;
+    }
+    if (playerRect.y < 0.0f) {
+        playerRect.y = 0.0f;
+    }
+    if (playerRect.x > windowWidth - playerRect.w) {
+        playerRect.x = windowWidth - playerRect.w;
+    }
+    if (playerRect.y > windowHeight - playerRect.h) {
+        playerRect.y = windowHeight - playerRect.h;
+    }
+} //updated it by adding deltaTime as one of it is parameters.
 
 void Render(SDL_Renderer* renderer,
     SDL_Texture* playerTexture,
@@ -136,4 +163,4 @@ void Render(SDL_Renderer* renderer,
         &playerRect);
 
     SDL_RenderPresent(renderer);
-} //done
+} // will update
