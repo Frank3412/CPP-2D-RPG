@@ -3,11 +3,34 @@
 #include <SDL3_image/SDL_image.h>
 
 void ProcessInput(bool& running, SDL_Event& event);
-void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime,
-    int windowWidth, int windowHeight);
+void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime);
 void Render(SDL_Renderer* renderer,
+    SDL_Texture* grassTexture,
+    SDL_Texture* stoneTexture,
     SDL_Texture* playerTexture,
-    SDL_FRect& playerRect);
+    SDL_FRect& playerRect,
+    float cameraX,
+    float cameraY);
+SDL_Texture* LoadTexture(
+    SDL_Renderer* renderer,
+    const char* filePath);
+
+constexpr int WINDOW_WIDTH = 1000;
+constexpr int WINDOW_HEIGHT = 800;
+constexpr int TILE_SIZE = 32;
+constexpr int MAP_ROWS = 60;
+constexpr int MAP_COLUMNS = 100;
+constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
+constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
+constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
+    {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
+
+    {1,0,1,2,1,0,2,0,1,0,0,1,0,1,0,0,0,0,0,1,0,2,0,0,0,0,1,0,2,0,1},
+
+    {1,1,1,0,1,1,1,2,1,0,1,0,0,0,1,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,1},
+
+    {1,0,1,0,1,0,1,0,1,0,0,1,2,0,1,2,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1},
+}; //The other unassigned cells will automatically be 0.
 int main() {
     // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -15,9 +38,8 @@ int main() {
         return 1;
     }
 
+
     //Create the window
-    constexpr int WINDOW_WIDTH = 1000;
-    constexpr int WINDOW_HEIGHT = 800;
     SDL_Window *window = SDL_CreateWindow(
         "Monster Quest",
         WINDOW_WIDTH,
@@ -40,26 +62,29 @@ int main() {
         return 1;
     }
 
-    // Load the image into a surface
-    SDL_Surface* surface = IMG_Load("../assets/player.bmp");
-
-    if (!surface) {
-        SDL_Log("Failed to load image: %s", SDL_GetError());
+    // Player Texture
+   SDL_Texture* playerTexture =
+       LoadTexture(renderer, "../assets/player.bmp");
+    if (!playerTexture) {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    // Grass Texture
+    SDL_Texture* grassTexture =
+       LoadTexture(renderer, "../assets/tiles/grass.bmp");
+    if (!grassTexture) {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
 
-    // Convert the surface into a texture
-    SDL_Texture* playerTexture =
-        SDL_CreateTextureFromSurface(renderer,surface);
-
-    // The surface is no longer needed
-    SDL_DestroySurface(surface);
-
-    if (!playerTexture) {
-        SDL_Log("Failed to create texture: %s", SDL_GetError());
+    // Stone Texture
+    SDL_Texture* stoneTexture =
+       LoadTexture(renderer, "../assets/tiles/stone.bmp");
+    if (!stoneTexture) {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -74,6 +99,8 @@ int main() {
     PLAYER_SIZE,
     PLAYER_SIZE};
 
+    float cameraX = 0.0f;
+    float cameraY = 0.0f;
     constexpr float PLAYER_SPEED = 200.0f;
     bool running = true;
 
@@ -90,17 +117,41 @@ int main() {
         previousCounter = currentCounter;
 
         ProcessInput(running, event);
-        Update(playerRect, PLAYER_SPEED, deltaTime,
-            WINDOW_WIDTH, WINDOW_HEIGHT);
+        Update(playerRect, PLAYER_SPEED, deltaTime);
 
-        Render(renderer,
+        cameraX = playerRect.x - WINDOW_WIDTH/2.0f;
+        cameraY = playerRect.y - WINDOW_HEIGHT/2.0f;
+
+        if (cameraX < 0.0f) {
+            cameraX = 0.0f;
+        }
+        if (cameraY < 0.0f) {
+            cameraY = 0.0f;
+        }
+        if (cameraX > WORLD_WIDTH - WINDOW_WIDTH) {
+            cameraX = WORLD_WIDTH - WINDOW_WIDTH;
+        }
+        if (cameraY > WORLD_HEIGHT - WINDOW_HEIGHT) {
+            cameraY = WORLD_HEIGHT - WINDOW_HEIGHT;
+        }
+
+        Render(
+            renderer,
+            grassTexture,
+            stoneTexture,
             playerTexture,
-            playerRect);
+            playerRect,
+            cameraX,
+            cameraY);
+
+        //****
 
         SDL_Delay(16);
     }
 
     // Cleanup
+    SDL_DestroyTexture(grassTexture);
+    SDL_DestroyTexture(stoneTexture);
     SDL_DestroyTexture(playerTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -116,8 +167,7 @@ void ProcessInput(bool& running, SDL_Event& event) {
     }
 } // will update
 
-void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime,
-    int windowWidth, int windowHeight) {
+void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime) {
 
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
 
@@ -140,27 +190,99 @@ void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime,
     if (playerRect.y < 0.0f) {
         playerRect.y = 0.0f;
     }
-    if (playerRect.x > windowWidth - playerRect.w) {
-        playerRect.x = windowWidth - playerRect.w;
+    if (playerRect.x > WORLD_WIDTH - playerRect.w) {
+        playerRect.x = WORLD_WIDTH - playerRect.w;
     }
-    if (playerRect.y > windowHeight - playerRect.h) {
-        playerRect.y = windowHeight - playerRect.h;
+    if (playerRect.y > WORLD_HEIGHT - playerRect.h) {
+        playerRect.y = WORLD_HEIGHT - playerRect.h;
     }
 } //updated it by adding deltaTime as one of it is parameters.
 
 void Render(SDL_Renderer* renderer,
+    SDL_Texture* grassTexture,
+    SDL_Texture* stoneTexture,
     SDL_Texture* playerTexture,
-    SDL_FRect& playerRect) {
+    SDL_FRect& playerRect,
+    float cameraX,
+    float cameraY) {
 
     SDL_SetRenderDrawColor(renderer, 40,60,100,255);
 
     SDL_RenderClear(renderer);
 
+    int firstColumn = static_cast<int>(cameraX/TILE_SIZE);
+    int firstRow = static_cast<int>(cameraY/TILE_SIZE);
+
+    int visibleColumns = WINDOW_WIDTH/TILE_SIZE;
+    int visibleRows = WINDOW_HEIGHT/TILE_SIZE;
+
+    int lastColumn = firstColumn + visibleColumns + 1;
+    if (lastColumn > MAP_COLUMNS) {
+        lastColumn = MAP_COLUMNS;
+    }
+    int lastRow = firstRow + visibleRows + 1;
+    if (lastRow > MAP_ROWS) {
+        lastRow = MAP_ROWS;
+    }
+
+    for (int row = firstRow; row < lastRow; row++) {
+        for (int column = firstColumn; column < lastColumn; column++) {
+
+            SDL_FRect tileRect{
+                static_cast<float>(column*TILE_SIZE)-cameraX,
+                static_cast<float>(row*TILE_SIZE)-cameraY,
+                static_cast<float>(TILE_SIZE),
+                static_cast<float>(TILE_SIZE)
+                    };
+            if (worldMap[row][column] == 1) {
+                SDL_RenderTexture(
+                    renderer,
+                    grassTexture,
+                    nullptr,
+                    &tileRect);
+            }
+            else if (worldMap[row][column] == 2) {
+                SDL_RenderTexture(
+                    renderer,
+                    stoneTexture,
+                    nullptr,
+                    &tileRect);
+            }
+        }
+    }
+
+    SDL_FRect playerScreenRect = playerRect;
+    playerScreenRect.x -= cameraX;
+    playerScreenRect.y -= cameraY;
     SDL_RenderTexture(
         renderer,
         playerTexture,
         nullptr,
-        &playerRect);
+        &playerScreenRect); //is originally &playerRect
 
     SDL_RenderPresent(renderer);
 } // will update
+
+SDL_Texture* LoadTexture(
+    SDL_Renderer* renderer,
+    const char* filePath) {
+    SDL_Surface* surface = IMG_Load(filePath);
+    if (!surface) {
+        SDL_Log("Failed to load image %s: %s",
+            filePath,
+            SDL_GetError());
+        return nullptr;
+    }
+    SDL_Texture* texture =
+        SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_DestroySurface(surface);
+
+    if (!texture) {
+        SDL_Log("Failed to create texture: %s",
+            SDL_GetError());
+        return nullptr;
+    }
+    return texture;
+} // done
+
