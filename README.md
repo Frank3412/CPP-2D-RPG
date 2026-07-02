@@ -25,8 +25,8 @@ A 2D RPG game built from scratch in Modern C++ using SDL3.
 
 - [x] Window creation
 - [x] Player movement
-- [ ] Delta time
-- [ ] Camera
+- [x] Delta time
+- [x] Camera
 - [ ] Tile map
 - [ ] Collision
 - [ ] Animation
