@@ -171,31 +171,59 @@ void Update(SDL_FRect& playerRect, float playerSpeed, double deltaTime) {
 
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
 
+    SDL_FRect nextPlayerRect = playerRect;
+
     if (keyboardStates[SDL_SCANCODE_UP]) {
-        playerRect.y -= playerSpeed * static_cast<float>(deltaTime);
+        nextPlayerRect.y -= playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_DOWN]) {
-        playerRect.y += playerSpeed * static_cast<float>(deltaTime);
+       nextPlayerRect.y += playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_LEFT]) {
-        playerRect.x -= playerSpeed * static_cast<float>(deltaTime);
+        nextPlayerRect.x -= playerSpeed * static_cast<float>(deltaTime);
     }
     if (keyboardStates[SDL_SCANCODE_RIGHT]) {
-        playerRect.x += playerSpeed * static_cast<float>(deltaTime);
+        nextPlayerRect.x += playerSpeed * static_cast<float>(deltaTime);
     }
 
-    if (playerRect.x < 0.0f) {
-        playerRect.x = 0.0f;
+    if (nextPlayerRect.x < 0.0f) {
+        nextPlayerRect.x = 0.0f;
     }
-    if (playerRect.y < 0.0f) {
-        playerRect.y = 0.0f;
+    if (nextPlayerRect.y < 0.0f) {
+        nextPlayerRect.y = 0.0f;
     }
-    if (playerRect.x > WORLD_WIDTH - playerRect.w) {
-        playerRect.x = WORLD_WIDTH - playerRect.w;
+    if (nextPlayerRect.x > WORLD_WIDTH - nextPlayerRect.w) {
+        nextPlayerRect.x = WORLD_WIDTH - nextPlayerRect.w;
     }
-    if (playerRect.y > WORLD_HEIGHT - playerRect.h) {
-        playerRect.y = WORLD_HEIGHT - playerRect.h;
+    if (nextPlayerRect.y > WORLD_HEIGHT - nextPlayerRect.h) {
+        nextPlayerRect.y = WORLD_HEIGHT - nextPlayerRect.h;
     }
+
+
+    int leftColumn =
+        static_cast<int>(nextPlayerRect.x / TILE_SIZE);
+    int rightColumn =
+        static_cast<int>((nextPlayerRect.x + nextPlayerRect.w -1)/ TILE_SIZE);
+    int topRow =
+        static_cast<int>(nextPlayerRect.y / TILE_SIZE);
+    int bottomRow =
+        static_cast<int>((nextPlayerRect.y + nextPlayerRect.h -1)/ TILE_SIZE);
+
+    int topLeftTile = worldMap[topRow][leftColumn];
+    int topRightTile = worldMap[topRow][rightColumn];
+    int bottomLeftTile = worldMap[bottomRow][leftColumn];
+    int bottomRightTile = worldMap[bottomRow][rightColumn];
+
+    if (topLeftTile == 2 ||
+        topRightTile == 2 ||
+        bottomLeftTile == 2 ||
+        bottomRightTile == 2) {
+        //Collision!
+    }
+    else {
+        playerRect = nextPlayerRect;
+    }
+
 } //updated it by adding deltaTime as one of it is parameters.
 
 void Render(SDL_Renderer* renderer,
