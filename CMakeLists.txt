@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
 
-add_executable(PracticeCode main.cpp)
+add_executable(PracticeCode main.cpp
+        Player.cpp
+        Player.h)
 
 target_link_libraries(
         PracticeCode
