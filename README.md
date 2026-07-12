@@ -4,14 +4,13 @@ A 2D RPG game built from scratch in Modern C++ using SDL3.
 
 ## Current Features
 
-- SDL3 game framework
-- Delta-time based movement
-- Tile-based world rendering
+- SDL3 rendering
+- Tile-based world
 - Camera that follows the player
-- Camera clamping at world boundaries
-- Multiple tile types (grass and stone)
-- Optimized rendering that only draws visible tiles
-- Organized game loop using Input → Update → Render architecture
+- Delta-time movement
+- Optimized visible tile rendering
+- Collision detection with wall sliding
+- Object-oriented Player class
 
 ## Current Progress
 
