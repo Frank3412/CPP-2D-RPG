@@ -15,6 +15,7 @@ public:
         float cameraX,
         float cameraY);
     SDL_FRect& GetRect();
+    SDL_FRect GetCollisionBox() const;
 
 private:
     SDL_Texture* texture;

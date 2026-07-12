@@ -25,6 +25,16 @@ SDL_Texture* Player::GetTexture() const {
     return texture;
 }
 
+SDL_FRect Player::GetCollisionBox() const {
+    SDL_FRect collisionBox;
+    collisionBox.x = rect.x + 18.0f;
+    collisionBox.y = rect.y + 42.0f;
+    collisionBox.w = 28.0f;
+    collisionBox.h = 20.0f;
+
+    return collisionBox;
+}
+
 void Player::Update(float deltaTime) {
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
     float movementX = 0.0f;
@@ -69,15 +79,15 @@ void Player::Update(float deltaTime) {
     // 3. Axis-separated title collisions to maintain smooth wall
     // sliding
     // Test X Axis movement safely
-    SDL_FRect testX = rect;
-    testX.x = nextRect.x;
+    SDL_FRect testX = GetCollisionBox();
+    testX.x += movementX;
     if (!CheckCollision(testX)) {
         rect.x = nextRect.x;
     }
 
     // Test Y Axis movement safely
-    SDL_FRect testY = rect;
-    testY.y = nextRect.y;
+    SDL_FRect testY = GetCollisionBox();
+    testY.y = movementY;
     if (!CheckCollision(testY)) {
         rect.y = nextRect.y;
     }
@@ -92,3 +102,4 @@ void Player::Render(SDL_Renderer* renderer,
     SDL_RenderTexture(renderer, texture,
         nullptr, &screenRect);
 }
+
