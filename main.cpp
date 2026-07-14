@@ -7,8 +7,6 @@
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
 SDL_Texture* LoadTexture(SDL_Renderer* renderer,const char* filePath);
-bool CheckCollision(SDL_FRect& playerRect);
-bool IsSolidTile(int tile);
 
 // Constants
 constexpr int TILE_EMPTY = 0;
@@ -28,8 +26,8 @@ constexpr int TILE_SIZE = 32;
 constexpr int MAP_ROWS = 60;
 constexpr int MAP_COLUMNS = 100;
 // Changed both const below
-extern const int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
-extern const int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
+constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
+constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
 
 constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
     {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
@@ -84,12 +82,8 @@ int main() {
         SDL_Quit();
         return 1;
     }
-    // Refactoring this line below.
-    //SDL_Texture* tileTextures[TILE_COUNT]{};
 
-    // This is going to be re-factor into TileMap.cpp/.h
-    //LoadTileTextures(renderer,tileTextures);
-    //
+
     TileMap tileMap;
     if (!tileMap.Initialize(renderer)) {
         return 1;
@@ -121,7 +115,7 @@ int main() {
         ProcessInput(running, event);
 
         // CLEANUP: Object-Oriented Update
-        player.Update(static_cast<float>(deltaTime));
+        player.Update(static_cast<float>(deltaTime), tileMap);
 
         //Camera tracking player position safely
         cameraX = player.GetRect().x - WINDOW_WIDTH/2.0f;
@@ -171,37 +165,9 @@ void ProcessInput(bool& running, SDL_Event& event) {
     }
 } // done
 
-bool IsSolidTile(int tile) {
-    return tile == TILE_STONE ||
-        tile == TILE_TREE ||
-            tile == TILE_HOUSE;
-}
+// IsSolidTile Func was here.
+// CheckCollision Func was here.
 
-bool CheckCollision(SDL_FRect& playerRect) {
-    int leftColumn =
-        static_cast<int>(playerRect.x/TILE_SIZE);
-    int rightColumn =
-        static_cast<int>((playerRect.x + playerRect.w - 1)/TILE_SIZE);
-    int topRow =
-        static_cast<int>(playerRect.y/TILE_SIZE);
-    int bottomRow =
-        static_cast<int>((playerRect.y + playerRect.h - 1)/TILE_SIZE);
-
-    // CRITICAL FIX: Prevent accessing rows/columns that
-    // don't exist in the array
-    if (leftColumn < 0 ||
-        rightColumn >= MAP_COLUMNS ||
-        topRow < 0 ||
-        bottomRow >= MAP_ROWS) {
-        return true;
-    }
-
-    return
-    IsSolidTile(worldMap[topRow][leftColumn]) ||
-        IsSolidTile(worldMap[topRow][rightColumn]) ||
-        IsSolidTile(worldMap[bottomRow][leftColumn]) ||
-                IsSolidTile(worldMap[bottomRow][rightColumn]);
-}
 
 SDL_Texture* LoadTexture(
     SDL_Renderer* renderer,

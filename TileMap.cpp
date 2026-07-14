@@ -1,6 +1,4 @@
 #include "TileMap.h"
-
-#include <iostream>
 #include <ostream>
 
 // Forward declaration so the Tile class knows stuff
@@ -75,3 +73,40 @@ void TileMap::Render(SDL_Renderer* renderer,
         }
     }
     }
+
+int TileMap::GetWorldWidth() const {
+    return MAP_COLUMNS * TILE_SIZE;
+}
+int TileMap::GetWorldHeight() const {
+    return MAP_ROWS * TILE_SIZE;
+}
+bool TileMap::IsSolidTile(int tile) const {
+    return tile == TILE_STONE ||
+        tile == TILE_TREE ||
+            tile == TILE_HOUSE;
+}
+bool TileMap::CheckCollision(const SDL_FRect& playerRect) const {
+    int leftColumn =
+        static_cast<int>(playerRect.x/TILE_SIZE);
+    int rightColumn =
+        static_cast<int>((playerRect.x + playerRect.w - 1)/TILE_SIZE);
+    int topRow =
+        static_cast<int>(playerRect.y/TILE_SIZE);
+    int bottomRow =
+        static_cast<int>((playerRect.y + playerRect.h - 1)/TILE_SIZE);
+
+    // CRITICAL FIX: Prevent accessing rows/columns that
+    // don't exist in the array
+    if (leftColumn < 0 ||
+        rightColumn >= MAP_COLUMNS ||
+        topRow < 0 ||
+        bottomRow >= MAP_ROWS) {
+        return true;
+        }
+
+    return
+    IsSolidTile(worldMap[topRow][leftColumn]) ||
+        IsSolidTile(worldMap[topRow][rightColumn]) ||
+        IsSolidTile(worldMap[bottomRow][leftColumn]) ||
+                IsSolidTile(worldMap[bottomRow][rightColumn]);
+}

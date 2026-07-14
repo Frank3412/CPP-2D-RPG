@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include "TileMap.h"
 
 class Player {
 public:
@@ -10,7 +11,7 @@ public:
 
     // We will now pass the collision map bounds/checking function context
     // to Update
-    void Update(float deltaTime);
+    void Update(float deltaTime, const TileMap& tileMap);
     void Render(SDL_Renderer* renderer,
         float cameraX,
         float cameraY);

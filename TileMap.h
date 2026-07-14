@@ -18,6 +18,7 @@ class TileMap {
     int GetWorldWidth() const;
     int GetWorldHeight() const;
 
+
     private:
 
     static constexpr int TILE_EMPTY = 0;
@@ -46,6 +47,9 @@ class TileMap {
 
         {1,0,1,0,1,0,1,0,1,0,0,1,2,0,1,2,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1},
     };
+
+    static constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
+    static constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
 
     SDL_Texture* tileTextures[TILE_COUNT];
 

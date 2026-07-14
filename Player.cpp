@@ -1,13 +1,6 @@
 #include "Player.h"
+#include "TileMap.h"
 
-#include <iostream>
-#include <ostream>
-
-// Forward declaration so the Player class knows CheckCollision
-// exists in main.cpp
-bool CheckCollision(SDL_FRect& playerRect);
-extern const int WORLD_WIDTH;
-extern const int WORLD_HEIGHT;
 
 Player::Player() {
     texture = nullptr;
@@ -35,7 +28,7 @@ SDL_FRect Player::GetCollisionBox() const {
     return collisionBox;
 }
 
-void Player::Update(float deltaTime) {
+void Player::Update(float deltaTime, const TileMap& tileMap) {
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
     float movementX = 0.0f;
     float movementY = 0.0f;
@@ -69,11 +62,11 @@ void Player::Update(float deltaTime) {
     if (nextRect.y < 0.0f) {
         nextRect.y = 0.0f;
     }
-    if (nextRect.x > WORLD_WIDTH - nextRect.w) {
-        nextRect.x = WORLD_WIDTH - nextRect.w;
+    if (nextRect.x > tileMap.GetWorldWidth() - nextRect.w) {
+        nextRect.x = tileMap.GetWorldWidth() - nextRect.w;
     }
-    if (nextRect.y > WORLD_HEIGHT - nextRect.h) {
-        nextRect.y = WORLD_HEIGHT - nextRect.h;
+    if (nextRect.y > tileMap.GetWorldHeight() - nextRect.h) {
+        nextRect.y = tileMap.GetWorldHeight() - nextRect.h;
     }
 
     // 3. Axis-separated title collisions to maintain smooth wall
@@ -81,14 +74,14 @@ void Player::Update(float deltaTime) {
     // Test X Axis movement safely
     SDL_FRect testX = GetCollisionBox();
     testX.x += movementX;
-    if (!CheckCollision(testX)) {
+    if (!tileMap.CheckCollision(testX)) {
         rect.x = nextRect.x;
     }
 
     // Test Y Axis movement safely
     SDL_FRect testY = GetCollisionBox();
     testY.y += movementY;
-    if (!CheckCollision(testY)) {
+    if (!tileMap.CheckCollision(testY)) {
         rect.y = nextRect.y;
     }
 }
