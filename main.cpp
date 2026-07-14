@@ -2,16 +2,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include "Player.h"
+#include "TileMap.h"
 
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
-void LoadTileTextures(SDL_Renderer* renderer,
-    SDL_Texture* tileTextures[]);
-void RenderMap(
-    SDL_Renderer* renderer,
-    SDL_Texture* tileTextures[],
-    float cameraX,
-    float cameraY);
 SDL_Texture* LoadTexture(SDL_Renderer* renderer,const char* filePath);
 bool CheckCollision(SDL_FRect& playerRect);
 bool IsSolidTile(int tile);
@@ -90,8 +84,16 @@ int main() {
         SDL_Quit();
         return 1;
     }
-    SDL_Texture* tileTextures[TILE_COUNT]{};
-    LoadTileTextures(renderer,tileTextures);
+    // Refactoring this line below.
+    //SDL_Texture* tileTextures[TILE_COUNT]{};
+
+    // This is going to be re-factor into TileMap.cpp/.h
+    //LoadTileTextures(renderer,tileTextures);
+    //
+    TileMap tileMap;
+    if (!tileMap.Initialize(renderer)) {
+        return 1;
+    }
 
 
     Player player;
@@ -143,7 +145,8 @@ int main() {
         SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
         SDL_RenderClear(renderer);
 
-        RenderMap(renderer, tileTextures, cameraX, cameraY);
+        // RenderMap is going to be moved to TileMap.cpp
+        tileMap.Render(renderer, cameraX, cameraY);
 
         //CLEANUP: Player draws itself cleanly now
         player.Render(renderer, cameraX, cameraY);
@@ -152,9 +155,6 @@ int main() {
     }
 
     // Free resources
-    for(int i = 0; i < TILE_COUNT; i++) {
-        SDL_DestroyTexture(tileTextures[i]);
-    }
     SDL_DestroyTexture(playerTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -170,19 +170,6 @@ void ProcessInput(bool& running, SDL_Event& event) {
         }
     }
 } // done
-
-void LoadTileTextures(SDL_Renderer *renderer,
-    SDL_Texture *tileTextures[]) {
-
-    tileTextures[TILE_GRASS] =
-        LoadTexture(renderer, "../assets/tiles/grass.bmp");
-    tileTextures[TILE_STONE] =
-        LoadTexture(renderer, "../assets/tiles/stone.bmp");
-    tileTextures[TILE_TREE] =
-        LoadTexture(renderer, "../assets/tiles/tree.bmp");
-    tileTextures[TILE_WATER] =
-        LoadTexture(renderer, "../assets/tiles/water.bmp");
-}
 
 bool IsSolidTile(int tile) {
     return tile == TILE_STONE ||
@@ -239,39 +226,3 @@ SDL_Texture* LoadTexture(
     return texture;
 }
 
-void RenderMap(
-    SDL_Renderer* renderer,
-    SDL_Texture* tileTextures[],
-    float cameraX,
-    float cameraY) {
-
-    int firstColumn = static_cast<int>(cameraX/TILE_SIZE);
-    int firstRow = static_cast<int>(cameraY/TILE_SIZE);
-    int visibleColumns = WINDOW_WIDTH/TILE_SIZE;
-    int visibleRows = WINDOW_HEIGHT/TILE_SIZE;
-
-    int lastColumn = std::min(firstColumn + visibleColumns + 1,
-       MAP_COLUMNS);
-    int lastRow = std::min(firstRow + visibleRows + 1,
-        MAP_ROWS);
-
-    for (int row = firstRow; row < lastRow; row++) {
-        for (int column = firstColumn; column < lastColumn; column++) {
-            SDL_FRect tileRect{
-                static_cast<float>(column*TILE_SIZE)-cameraX,
-                static_cast<float>(row*TILE_SIZE)-cameraY,
-                static_cast<float>(TILE_SIZE),
-                static_cast<float>(TILE_SIZE)
-                    };
-            const int tile = worldMap[row][column];
-            if (tileTextures[tile] != nullptr) {
-                SDL_RenderTexture(
-                    renderer,
-                    tileTextures[tile],
-                    nullptr,
-                    &tileRect);
-            }
-
-        }
-    }
-}

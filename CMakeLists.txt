@@ -9,7 +9,9 @@ find_package(SDL3_image CONFIG REQUIRED)
 
 add_executable(PracticeCode main.cpp
         Player.cpp
-        Player.h)
+        Player.h
+        TileMap.cpp
+        TileMap.h)
 
 target_link_libraries(
         PracticeCode

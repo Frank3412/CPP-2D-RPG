@@ -87,7 +87,7 @@ void Player::Update(float deltaTime) {
 
     // Test Y Axis movement safely
     SDL_FRect testY = GetCollisionBox();
-    testY.y = movementY;
+    testY.y += movementY;
     if (!CheckCollision(testY)) {
         rect.y = nextRect.y;
     }
