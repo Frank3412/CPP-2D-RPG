@@ -1,8 +1,8 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
-#include "Player.h"
-#include "TileMap.h"
+#include "../include/Player.h"
+#include "../include/TileMap.h"
 
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
@@ -25,9 +25,6 @@ constexpr int TILE_SIZE = 32;
 // matching array indices
 constexpr int MAP_ROWS = 60;
 constexpr int MAP_COLUMNS = 100;
-// Changed both const below
-constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
-constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
 
 constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
     {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
@@ -128,11 +125,11 @@ int main() {
         if (cameraY < 0.0f) {
             cameraY = 0.0f;
         }
-        if (cameraX > WORLD_WIDTH - WINDOW_WIDTH) {
-            cameraX = WORLD_WIDTH - WINDOW_WIDTH;
+        if (cameraX > tileMap.GetWorldWidth() - WINDOW_WIDTH) {
+            cameraX = tileMap.GetWorldWidth() - WINDOW_WIDTH;
         }
-        if (cameraY > WORLD_HEIGHT - WINDOW_HEIGHT) {
-            cameraY = WORLD_HEIGHT - WINDOW_HEIGHT;
+        if (cameraY > tileMap.GetWorldHeight() - WINDOW_HEIGHT) {
+            cameraY = tileMap.GetWorldHeight() - WINDOW_HEIGHT;
         }
 
         // Render pass

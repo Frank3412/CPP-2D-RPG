@@ -7,11 +7,17 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
 
-add_executable(PracticeCode main.cpp
-        Player.cpp
-        Player.h
-        TileMap.cpp
-        TileMap.h)
+add_executable(PracticeCode
+        src/main.cpp
+        src/Player.cpp
+        src/TileMap.cpp
+)
+
+target_include_directories(
+        PracticeCode
+        PRIVATE
+        include
+)
 
 target_link_libraries(
         PracticeCode

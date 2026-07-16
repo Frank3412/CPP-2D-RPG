@@ -1,4 +1,4 @@
-#include "TileMap.h"
+#include "../include/TileMap.h"
 #include <ostream>
 
 // Forward declaration so the Tile class knows stuff
