@@ -1,8 +1,9 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
-#include "../include/Player.h"
-#include "../include/TileMap.h"
+#include "Player.h"
+#include "TileMap.h"
+#include "Camera.h"
 
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
@@ -90,8 +91,7 @@ int main() {
     Player player;
     player.SetTexture(playerTexture);
 
-    float cameraX = 0.0f;
-    float cameraY = 0.0f;
+    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
     bool running = true;
 
     SDL_Event event;
@@ -114,33 +114,20 @@ int main() {
         // CLEANUP: Object-Oriented Update
         player.Update(static_cast<float>(deltaTime), tileMap);
 
-        //Camera tracking player position safely
-        cameraX = player.GetRect().x - WINDOW_WIDTH/2.0f;
-        cameraY = player.GetRect().y - WINDOW_HEIGHT/2.0f;
 
-
-        if (cameraX < 0.0f) {
-            cameraX = 0.0f;
-        }
-        if (cameraY < 0.0f) {
-            cameraY = 0.0f;
-        }
-        if (cameraX > tileMap.GetWorldWidth() - WINDOW_WIDTH) {
-            cameraX = tileMap.GetWorldWidth() - WINDOW_WIDTH;
-        }
-        if (cameraY > tileMap.GetWorldHeight() - WINDOW_HEIGHT) {
-            cameraY = tileMap.GetWorldHeight() - WINDOW_HEIGHT;
-        }
+        camera.Update(player.GetRect(), tileMap);
+        //Took this chunk of code here and attached it to Camera.cpp
+        // in Camera::Update function.
 
         // Render pass
         SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
         SDL_RenderClear(renderer);
 
         // RenderMap is going to be moved to TileMap.cpp
-        tileMap.Render(renderer, cameraX, cameraY);
+        tileMap.Render(renderer, camera.GetX(), camera.GetY());
 
         //CLEANUP: Player draws itself cleanly now
-        player.Render(renderer, cameraX, cameraY);
+        player.Render(renderer, camera.GetX(), camera.GetY());
 
         SDL_RenderPresent(renderer);
     }
