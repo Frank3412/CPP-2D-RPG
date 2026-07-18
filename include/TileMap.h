@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+class AssetManager; // forward declaration
 
 class TileMap {
     public:
@@ -8,7 +9,8 @@ class TileMap {
     TileMap();
     ~TileMap();
 
-    bool Initialize(SDL_Renderer* renderer);
+    bool Initialize(SDL_Renderer* renderer,
+        AssetManager& assetManager);
 
     void Render( SDL_Renderer* renderer,
         float cameraX,
@@ -55,5 +57,6 @@ class TileMap {
 
     bool IsSolidTile(int tile) const;
 
-    bool LoadTextures(SDL_Renderer* renderer);
+    bool LoadTextures(SDL_Renderer* renderer,
+        AssetManager& assetManager);
 };

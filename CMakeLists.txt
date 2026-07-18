@@ -12,6 +12,7 @@ add_executable(PracticeCode
         src/Player.cpp
         src/TileMap.cpp
         src/Camera.cpp
+        src/AssetManager.cpp
 )
 
 target_include_directories(

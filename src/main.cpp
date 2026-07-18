@@ -1,13 +1,14 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+
+#include "AssetManager.h"
 #include "Player.h"
 #include "TileMap.h"
 #include "Camera.h"
 
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
-SDL_Texture* LoadTexture(SDL_Renderer* renderer,const char* filePath);
 
 // Constants
 constexpr int TILE_EMPTY = 0;
@@ -72,8 +73,10 @@ int main() {
     }
 
     // Player Texture
-   SDL_Texture* playerTexture =
-       LoadTexture(renderer, "../assets/player.bmp");
+    AssetManager assetManager;
+    SDL_Texture* playerTexture =
+        assetManager.LoadTexture(renderer, "../assets/player.bmp");
+
     if (!playerTexture) {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -83,7 +86,7 @@ int main() {
 
 
     TileMap tileMap;
-    if (!tileMap.Initialize(renderer)) {
+    if (!tileMap.Initialize(renderer, assetManager)) {
         return 1;
     }
 
@@ -148,31 +151,3 @@ void ProcessInput(bool& running, SDL_Event& event) {
         }
     }
 } // done
-
-// IsSolidTile Func was here.
-// CheckCollision Func was here.
-
-
-SDL_Texture* LoadTexture(
-    SDL_Renderer* renderer,
-    const char* filePath) {
-    SDL_Surface* surface = IMG_Load(filePath);
-    //SDL_Surface* surface = SDL_LoadBMP(filePath);
-    if (!surface) {
-        SDL_Log("Failed to load image %s: %s",
-            filePath,
-            SDL_GetError());
-        return nullptr;
-    }
-    SDL_Texture* texture =
-        SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_DestroySurface(surface);
-
-    if (!texture) {
-        SDL_Log("Failed to create texture: %s",
-            SDL_GetError());
-        return nullptr;
-    }
-    return texture;
-}
-

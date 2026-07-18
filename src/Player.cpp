@@ -1,5 +1,5 @@
-#include "../include/Player.h"
-#include "../include/TileMap.h"
+#include "Player.h"
+#include "TileMap.h"
 
 
 Player::Player() {

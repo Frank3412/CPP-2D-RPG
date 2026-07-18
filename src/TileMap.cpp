@@ -1,5 +1,8 @@
 #include "TileMap.h"
+#include "AssetManager.h"
+
 #include <ostream>
+
 
 // Forward declaration so the Tile class knows stuff
 SDL_Texture* LoadTexture(SDL_Renderer* renderer,
@@ -19,19 +22,22 @@ TileMap::~TileMap() {
     }
 }
 
-bool TileMap::Initialize(SDL_Renderer* renderer) {
-    return LoadTextures(renderer);
+bool TileMap::Initialize(SDL_Renderer* renderer,
+    AssetManager& assetManager) {
+
+    return LoadTextures(renderer, assetManager);
 }
 
-bool TileMap::LoadTextures(SDL_Renderer* renderer) {
+bool TileMap::LoadTextures(SDL_Renderer* renderer,
+    AssetManager& assetManager) {
     tileTextures[TILE_GRASS] =
-        LoadTexture(renderer, "../assets/tiles/grass.bmp");
+        assetManager.LoadTexture(renderer, "../assets/tiles/grass.bmp");
     tileTextures[TILE_STONE] =
-        LoadTexture(renderer, "../assets/tiles/stone.bmp");
+        assetManager.LoadTexture(renderer, "../assets/tiles/stone.bmp");
     tileTextures[TILE_TREE] =
-        LoadTexture(renderer, "../assets/tiles/tree.bmp");
+        assetManager.LoadTexture(renderer, "../assets/tiles/tree.bmp");
     tileTextures[TILE_WATER] =
-        LoadTexture(renderer, "../assets/tiles/water.bmp");
+       assetManager.LoadTexture(renderer, "../assets/tiles/water.bmp");
 
     return tileTextures[TILE_GRASS] &&
         tileTextures[TILE_STONE] &&
