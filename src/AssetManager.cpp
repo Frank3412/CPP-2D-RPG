@@ -3,6 +3,13 @@
 
 SDL_Texture* AssetManager::LoadTexture(SDL_Renderer* renderer,
     const char* filePath) {
+    std::string key(filePath);
+
+    auto it = textures.find(key);
+    if (it != textures.end()) {
+        return it->second;
+    }
+
     SDL_Surface* surface = IMG_Load(filePath);
     //SDL_Surface* surface = SDL_LoadBMP(filePath);
     if (!surface) {
@@ -20,5 +27,16 @@ SDL_Texture* AssetManager::LoadTexture(SDL_Renderer* renderer,
             SDL_GetError());
         return nullptr;
     }
+    //textures[key] = texture;
+    textures.emplace(key, texture);
     return texture;
+}
+
+
+AssetManager::~AssetManager() {
+    for (auto& pair : textures)
+    {
+        SDL_DestroyTexture(pair.second);
+    }
+    textures.clear();
 }

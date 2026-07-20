@@ -136,7 +136,6 @@ int main() {
     }
 
     // Free resources
-    SDL_DestroyTexture(playerTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

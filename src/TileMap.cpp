@@ -17,9 +17,7 @@ TileMap::TileMap() {
 }
 
 TileMap::~TileMap() {
-    for (int i = 0; i < TILE_COUNT; i++) {
-        SDL_DestroyTexture(tileTextures[i]);
-    }
+   //AssetManager is now responsible for texture destruction.
 }
 
 bool TileMap::Initialize(SDL_Renderer* renderer,
