@@ -47,8 +47,6 @@ int main() {
         return 1;
     }
 
-
-    // Player Texture
    //Moved  AssetManager assetManager; to Game.
     SDL_Texture* playerTexture =
         game.GetAssetManager().LoadTexture(game.GetRenderer(), "../assets/player.bmp");
@@ -65,11 +63,10 @@ int main() {
         return 1;
     }
 
+    game.GetPlayer().SetTexture(playerTexture);
 
-    Player player;
-    player.SetTexture(playerTexture);
+    //Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
     bool running = true;
 
     SDL_Event event;
@@ -90,10 +87,10 @@ int main() {
         ProcessInput(running, event);
 
         // CLEANUP: Object-Oriented Update
-        player.Update(static_cast<float>(deltaTime), game.GetTileMap());
+       game.GetPlayer().Update(static_cast<float>(deltaTime), game.GetTileMap());
 
 
-        camera.Update(player.GetRect(), game.GetTileMap());
+        game.GetCamera().Update(game.GetPlayer().GetRect(), game.GetTileMap());
         //Took this chunk of code here and attached it to Camera.cpp
         // in Camera::Update function.
 
@@ -102,10 +99,10 @@ int main() {
         SDL_RenderClear(game.GetRenderer());
 
         // RenderMap is going to be moved to TileMap.cpp
-        game.GetTileMap().Render(game.GetRenderer(), camera.GetX(), camera.GetY());
+        game.GetTileMap().Render(game.GetRenderer(), game.GetCamera().GetX(), game.GetCamera().GetY());
 
         //CLEANUP: Player draws itself cleanly now
-        player.Render(game.GetRenderer(), camera.GetX(), camera.GetY());
+        game.GetPlayer().Render(game.GetRenderer(), game.GetCamera().GetX(), game.GetCamera().GetY());
 
         SDL_RenderPresent(game.GetRenderer());
     }

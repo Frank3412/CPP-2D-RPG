@@ -3,9 +3,10 @@
 
 
 Game::Game()
-    :window(nullptr),
-renderer(nullptr) {
-
+    : window(nullptr),
+      renderer(nullptr),
+camera(WINDOW_WIDTH,WINDOW_HEIGHT)
+{
 }
 
 bool Game::Initialize() {
@@ -29,10 +30,8 @@ bool Game::Initialize() {
     }
 
     //Create the renderer
-    renderer =
-        SDL_CreateRenderer(window, "direct3d11");
-    // This is the one that we should move back to.
-    //SDL_CreateRenderer(window,nullptr);
+    renderer = SDL_CreateRenderer(window,nullptr);
+
     if (renderer) {
         SDL_SetRenderVSync(renderer, 1);// 1 turns VSync ON in SDL3
     }
@@ -61,6 +60,14 @@ AssetManager& Game::GetAssetManager() {
 TileMap& Game::GetTileMap() {
     return tileMap;
 }
+
+Player& Game::GetPlayer() {
+    return player;
+}
+
+Camera& Game::GetCamera() {
+    return camera;
+ }
 
 
 void Game::Run() {

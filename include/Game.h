@@ -2,6 +2,8 @@
 
 #include "AssetManager.h"
 #include "TileMap.h"
+#include "Player.h"
+#include "Camera.h"
 #include <SDL3/SDL.h>
 
 
@@ -15,6 +17,8 @@ public:
     SDL_Renderer* GetRenderer() const;
     AssetManager& GetAssetManager();
     TileMap& GetTileMap();
+    Player& GetPlayer();
+    Camera& GetCamera();
 
 
 private:
@@ -22,4 +26,6 @@ private:
     SDL_Renderer* renderer;
     AssetManager assetManager;
     TileMap tileMap;
+    Player player;
+    Camera camera;
 };
