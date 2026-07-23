@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "TileMap.h"
 #include "Camera.h"
+#include "Game.h"
 
 //Forward declarations
 void ProcessInput(bool& running, SDL_Event& event);
@@ -39,54 +40,28 @@ constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
 }; //The other unassigned cells will automatically be 0.
 
 int main() {
-    // Initialize SDL
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("SDL failed to initialize: %s", SDL_GetError());
+    //Added this chuck of code into Game::Initialize.
+
+    Game game;
+    if (!game.Initialize()) {
         return 1;
     }
 
-    //Create the window
-    SDL_Window *window = SDL_CreateWindow(
-        "Monster Quest",
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        0);
-    if (!window) {
-        SDL_Log("Failed to create window: %s", SDL_GetError());
-        SDL_Quit();
-        return 1;
-    }
-
-    //Create the renderer
-    SDL_Renderer* renderer =
-        SDL_CreateRenderer(window, "direct3d11");
-        //SDL_CreateRenderer(window,nullptr);
-    if (renderer) {
-        SDL_SetRenderVSync(renderer, 1);// 1 turns VSync ON in SDL3
-    }
-
-    if (!renderer) {
-        SDL_Log("Failed to create renderer: %s", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
 
     // Player Texture
-    AssetManager assetManager;
+   //Moved  AssetManager assetManager; to Game.
     SDL_Texture* playerTexture =
-        assetManager.LoadTexture(renderer, "../assets/player.bmp");
+        game.GetAssetManager().LoadTexture(game.GetRenderer(), "../assets/player.bmp");
 
+    // This if statement needs to be removed/moved.
     if (!playerTexture) {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        game.Shutdown();
         return 1;
     }
 
 
-    TileMap tileMap;
-    if (!tileMap.Initialize(renderer, assetManager)) {
+    //TileMap tileMap;
+    if (!game.GetTileMap().Initialize(game.GetRenderer(), game.GetAssetManager())) {
         return 1;
     }
 
@@ -115,30 +90,28 @@ int main() {
         ProcessInput(running, event);
 
         // CLEANUP: Object-Oriented Update
-        player.Update(static_cast<float>(deltaTime), tileMap);
+        player.Update(static_cast<float>(deltaTime), game.GetTileMap());
 
 
-        camera.Update(player.GetRect(), tileMap);
+        camera.Update(player.GetRect(), game.GetTileMap());
         //Took this chunk of code here and attached it to Camera.cpp
         // in Camera::Update function.
 
         // Render pass
-        SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
-        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(game.GetRenderer(), 40, 60, 100, 255);
+        SDL_RenderClear(game.GetRenderer());
 
         // RenderMap is going to be moved to TileMap.cpp
-        tileMap.Render(renderer, camera.GetX(), camera.GetY());
+        game.GetTileMap().Render(game.GetRenderer(), camera.GetX(), camera.GetY());
 
         //CLEANUP: Player draws itself cleanly now
-        player.Render(renderer, camera.GetX(), camera.GetY());
+        player.Render(game.GetRenderer(), camera.GetX(), camera.GetY());
 
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(game.GetRenderer());
     }
 
     // Free resources
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    game.Shutdown();
     return 0;
 }
 // End of main()
