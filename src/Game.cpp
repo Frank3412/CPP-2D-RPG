@@ -5,11 +5,15 @@
 Game::Game()
     : window(nullptr),
       renderer(nullptr),
-camera(WINDOW_WIDTH,WINDOW_HEIGHT)
+camera(WINDOW_WIDTH,WINDOW_HEIGHT),
+running(true),
+previousCounter(SDL_GetPerformanceCounter()),
+event()
 {
 }
 
 bool Game::Initialize() {
+
 
     // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -43,39 +47,78 @@ bool Game::Initialize() {
         return false;
     }
 
+    // Player texture initialization
+    SDL_Texture* texture =
+        assetManager.LoadTexture(renderer,"../assets/player.bmp");
+    if (!texture) {
+        Shutdown();
+        return false;
+    }
+    player.SetTexture(texture);
+
+
+    // Getting TileMap Texture started
+    if (!tileMap.Initialize(renderer, assetManager)) {
+        return false;
+    }
+
     return true;
 }
 
-SDL_Window* Game::GetWindow() const {
-    return window;
-}
-SDL_Renderer* Game::GetRenderer() const {
-    return renderer;
-}
-
-AssetManager& Game::GetAssetManager() {
-    return assetManager;
+void Game::ProcessInput() {
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
+            running = false;
+        }
+    }
 }
 
-TileMap& Game::GetTileMap() {
-    return tileMap;
+void Game::Update(float deltaTime) {
+
+    player.Update(deltaTime, tileMap);
+    camera.Update(player.GetRect(), tileMap);
+
 }
 
-Player& Game::GetPlayer() {
-    return player;
+void Game::Render() {
+
+    // Render pass
+        SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
+        SDL_RenderClear(renderer);
+
+        // RenderMap is going to be moved to TileMap.cpp
+        tileMap.Render(renderer, camera.GetX(), camera.GetY());
+
+        //CLEANUP: Player draws itself cleanly now
+        player.Render(renderer, camera.GetX(), camera.GetY());
+
+        SDL_RenderPresent(renderer);
 }
-
-Camera& Game::GetCamera() {
-    return camera;
- }
-
 
 void Game::Run() {
 
+    while (running) {
+
+        Uint64 currentCounter = SDL_GetPerformanceCounter();
+        // Make sure you divide by the frequency AFTER
+        // subtracting the counters
+        double deltaTime =
+            static_cast<double>(currentCounter - previousCounter)/
+                SDL_GetPerformanceFrequency();
+        previousCounter = currentCounter;
+
+        ProcessInput();
+
+        // Update Function
+        Update(static_cast<float>(deltaTime));
+
+        // Render Function
+        Render();
+
+    }
 }
 
 void Game::Shutdown() {
-
     SDL_DestroyRenderer(renderer);
     renderer = nullptr;
     SDL_DestroyWindow(window);

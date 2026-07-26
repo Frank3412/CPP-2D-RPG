@@ -13,12 +13,7 @@ public:
     bool Initialize();
     void Run();
     void Shutdown();
-    SDL_Window* GetWindow() const;
-    SDL_Renderer* GetRenderer() const;
-    AssetManager& GetAssetManager();
-    TileMap& GetTileMap();
-    Player& GetPlayer();
-    Camera& GetCamera();
+
 
 
 private:
@@ -28,4 +23,10 @@ private:
     TileMap tileMap;
     Player player;
     Camera camera;
+    bool running;
+    Uint64 previousCounter;
+    SDL_Event event;
+    void ProcessInput();
+    void Update(float deltaTime);
+    void Render();
 };

@@ -1,15 +1,8 @@
 #include <iostream>
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 
-#include "AssetManager.h"
-#include "Player.h"
-#include "TileMap.h"
-#include "Camera.h"
 #include "Game.h"
 
-//Forward declarations
-void ProcessInput(bool& running, SDL_Event& event);
 
 // Constants
 constexpr int TILE_EMPTY = 0;
@@ -40,83 +33,18 @@ constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
 }; //The other unassigned cells will automatically be 0.
 
 int main() {
-    //Added this chuck of code into Game::Initialize.
 
+
+    // Game Initialization
     Game game;
     if (!game.Initialize()) {
         return 1;
     }
-
-   //Moved  AssetManager assetManager; to Game.
-    SDL_Texture* playerTexture =
-        game.GetAssetManager().LoadTexture(game.GetRenderer(), "../assets/player.bmp");
-
-    // This if statement needs to be removed/moved.
-    if (!playerTexture) {
-        game.Shutdown();
-        return 1;
-    }
-
-
-    //TileMap tileMap;
-    if (!game.GetTileMap().Initialize(game.GetRenderer(), game.GetAssetManager())) {
-        return 1;
-    }
-
-    game.GetPlayer().SetTexture(playerTexture);
-
-    //Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-    bool running = true;
-
-    SDL_Event event;
-
-    // The Game Loop
-    Uint64 previousCounter = SDL_GetPerformanceCounter();
-
-    while (running) {
-
-        Uint64 currentCounter = SDL_GetPerformanceCounter();
-        // Make sure you divide by the frequency AFTER
-        // subtracting the counters
-        double deltaTime =
-            static_cast<double>(currentCounter - previousCounter)/
-                SDL_GetPerformanceFrequency();
-        previousCounter = currentCounter;
-
-        ProcessInput(running, event);
-
-        // CLEANUP: Object-Oriented Update
-       game.GetPlayer().Update(static_cast<float>(deltaTime), game.GetTileMap());
-
-
-        game.GetCamera().Update(game.GetPlayer().GetRect(), game.GetTileMap());
-        //Took this chunk of code here and attached it to Camera.cpp
-        // in Camera::Update function.
-
-        // Render pass
-        SDL_SetRenderDrawColor(game.GetRenderer(), 40, 60, 100, 255);
-        SDL_RenderClear(game.GetRenderer());
-
-        // RenderMap is going to be moved to TileMap.cpp
-        game.GetTileMap().Render(game.GetRenderer(), game.GetCamera().GetX(), game.GetCamera().GetY());
-
-        //CLEANUP: Player draws itself cleanly now
-        game.GetPlayer().Render(game.GetRenderer(), game.GetCamera().GetX(), game.GetCamera().GetY());
-
-        SDL_RenderPresent(game.GetRenderer());
-    }
+    // Game Loop
+    game.Run();
 
     // Free resources
     game.Shutdown();
     return 0;
 }
 // End of main()
-
-void ProcessInput(bool& running, SDL_Event& event) {
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_QUIT) {
-            running = false;
-        }
-    }
-} // done
