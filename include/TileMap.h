@@ -1,6 +1,9 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <vector>
+#include <string>
+
 class AssetManager; // forward declaration
 
 class TileMap {
@@ -20,6 +23,7 @@ class TileMap {
     int GetWorldWidth() const;
     int GetWorldHeight() const;
 
+    bool LoadMap(const std::string& filename);
 
     private:
 
@@ -40,15 +44,9 @@ class TileMap {
     static constexpr int WINDOW_WIDTH = 1000;
     static constexpr int WINDOW_HEIGHT = 800;
 
-    static constexpr int worldMap[MAP_ROWS][MAP_COLUMNS]={
-        {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
-
-        {1,4,1,2,1,3,2,0,1,0,0,1,0,1,0,0,0,0,0,1,0,2,0,4,4,4,1,0,2,0,1},
-
-        {1,1,1,3,1,1,1,2,1,3,1,3,0,3,1,2,2,2,2,1,0,0,0,3,0,4,4,4,4,0,1},
-
-        {1,0,1,0,1,0,1,0,1,0,0,1,2,0,1,2,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1},
-    };
+    std::vector<std::vector<int>> worldMap;
+    int mapColumns = 0;
+    int mapRows = 0;
 
     static constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
     static constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;

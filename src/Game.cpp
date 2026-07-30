@@ -62,6 +62,10 @@ bool Game::Initialize() {
         return false;
     }
 
+    if (!tileMap.LoadMap("../assets/maps/map01.txt")) {
+        return false;
+    }
+
     return true;
 }
 

@@ -2,6 +2,8 @@
 #include "AssetManager.h"
 
 #include <ostream>
+#include <fstream>
+#include <sstream>
 
 
 // Forward declaration so the Tile class knows stuff
@@ -11,9 +13,52 @@ SDL_Texture* LoadTexture(SDL_Renderer* renderer,
 
 TileMap::TileMap() {
 
-    for (int i = 0; i < TILE_COUNT; i++) {
+    for (int i = 0; i<TILE_COUNT; ++i) {
         tileTextures[i] = nullptr;
     }
+
+    worldMap = {
+        {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
+
+        {1,4,1,2,1,3,2,0,1,0,0,1,0,1,0,0,0,0,0,1,0,2,0,4,4,4,1,0,2,0,1},
+
+        {1,1,1,3,1,1,1,2,1,3,1,3,0,3,1,2,2,2,2,1,0,0,0,3,0,4,4,4,4,0,1},
+
+        {1,0,1,0,1,0,1,0,1,0,0,1,2,0,1,2,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1},
+};
+}
+
+bool TileMap::LoadMap(const std::string& filename) {
+
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        SDL_Log("Failed to open map file: %s", filename.c_str());
+        return false;
+    }
+
+    file >> mapColumns >> mapRows;
+
+    SDL_Log("Map size: %d columns x %d rows",
+        mapColumns,
+        mapRows);
+
+    worldMap.clear();
+
+    for (int row = 0; row < mapRows; ++row) {
+        std::vector<int> rowData;
+
+        for (int column = 0; column < mapColumns; ++column) {
+            int tile;
+            if (!(file>>tile)) {
+                SDL_Log("Failed to read tile data.");
+                return false;
+            }
+            rowData.push_back(tile);
+        }
+        worldMap.push_back(rowData);
+    }
+    return true;
 }
 
 TileMap::~TileMap() {
