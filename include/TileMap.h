@@ -38,8 +38,6 @@ class TileMap {
 
     static constexpr int TILE_SIZE = 32;
 
-    static constexpr int MAP_ROWS = 60;
-    static constexpr int MAP_COLUMNS = 100;
 
     static constexpr int WINDOW_WIDTH = 1000;
     static constexpr int WINDOW_HEIGHT = 800;
@@ -48,8 +46,6 @@ class TileMap {
     int mapColumns = 0;
     int mapRows = 0;
 
-    static constexpr int WORLD_WIDTH = MAP_COLUMNS * TILE_SIZE;
-    static constexpr int WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
 
     SDL_Texture* tileTextures[TILE_COUNT];
 

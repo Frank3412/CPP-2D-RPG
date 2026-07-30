@@ -97,10 +97,11 @@ void TileMap::Render(SDL_Renderer* renderer,
     int visibleColumns = WINDOW_WIDTH/TILE_SIZE;
     int visibleRows = WINDOW_HEIGHT/TILE_SIZE;
 
-    int lastColumn = std::min(firstColumn + visibleColumns + 1,
-       MAP_COLUMNS);
     int lastRow = std::min(firstRow + visibleRows + 1,
-        MAP_ROWS);
+        mapRows); // static_cast<int>(worldMap.size())
+
+    int lastColumn = std::min(firstColumn + visibleColumns + 1,
+       mapColumns); // static_cast<int>(worldMap[row].size())
 
     for (int row = firstRow; row < lastRow; row++) {
         for (int column = firstColumn; column < lastColumn; column++) {
@@ -124,10 +125,10 @@ void TileMap::Render(SDL_Renderer* renderer,
     }
 
 int TileMap::GetWorldWidth() const {
-    return MAP_COLUMNS * TILE_SIZE;
+    return mapColumns * TILE_SIZE;
 }
 int TileMap::GetWorldHeight() const {
-    return MAP_ROWS * TILE_SIZE;
+    return mapRows * TILE_SIZE;
 }
 bool TileMap::IsSolidTile(int tile) const {
     return tile == TILE_STONE ||
@@ -144,12 +145,11 @@ bool TileMap::CheckCollision(const SDL_FRect& playerRect) const {
     int bottomRow =
         static_cast<int>((playerRect.y + playerRect.h - 1)/TILE_SIZE);
 
-    // CRITICAL FIX: Prevent accessing rows/columns that
-    // don't exist in the array
+    // Prevent accessing rows/columns that don't exist in the map
     if (leftColumn < 0 ||
-        rightColumn >= MAP_COLUMNS ||
+        rightColumn >= mapColumns ||
         topRow < 0 ||
-        bottomRow >= MAP_ROWS) {
+        bottomRow >= mapRows) {
         return true;
         }
 
