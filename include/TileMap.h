@@ -39,10 +39,7 @@ class TileMap {
     static constexpr int TILE_SIZE = 32;
 
 
-    static constexpr int WINDOW_WIDTH = 1000;
-    static constexpr int WINDOW_HEIGHT = 800;
-
-    std::vector<std::vector<int>> worldMap;
+    std::vector<std::vector<int> > worldMap;
     int mapColumns = 0;
     int mapRows = 0;
 
