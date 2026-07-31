@@ -1,14 +1,8 @@
 #include "TileMap.h"
 #include "AssetManager.h"
 
-#include <ostream>
 #include <fstream>
-#include <sstream>
 
-
-// Forward declaration so the Tile class knows stuff
-SDL_Texture* LoadTexture(SDL_Renderer* renderer,
-    const char* filePath);
 
 
 TileMap::TileMap() {
@@ -16,16 +10,6 @@ TileMap::TileMap() {
     for (int i = 0; i<TILE_COUNT; ++i) {
         tileTextures[i] = nullptr;
     }
-
-    worldMap = {
-        {1,0,2,2,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1},
-
-        {1,4,1,2,1,3,2,0,1,0,0,1,0,1,0,0,0,0,0,1,0,2,0,4,4,4,1,0,2,0,1},
-
-        {1,1,1,3,1,1,1,2,1,3,1,3,0,3,1,2,2,2,2,1,0,0,0,3,0,4,4,4,4,0,1},
-
-        {1,0,1,0,1,0,1,0,1,0,0,1,2,0,1,2,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1},
-};
 }
 
 bool TileMap::LoadMap(const std::string& filename) {
@@ -37,12 +21,23 @@ bool TileMap::LoadMap(const std::string& filename) {
         return false;
     }
 
-    file >> mapColumns >> mapRows;
+    if (!(file >> mapColumns >> mapRows)) {
+        SDL_Log("Failed to read map dimensions.");
+        return false;
+    }
+
+    if (mapColumns <= 0 || mapRows <= 0) {
+        SDL_Log("Invalid map dimensions: %d x %d",
+            mapColumns, mapRows);
+        return false;
+    }
 
     SDL_Log("Map size: %d columns x %d rows",
         mapColumns,
         mapRows);
 
+
+    // Clear the existing map before loading the new map.
     worldMap.clear();
 
     for (int row = 0; row < mapRows; ++row) {
@@ -54,9 +49,18 @@ bool TileMap::LoadMap(const std::string& filename) {
                 SDL_Log("Failed to read tile data.");
                 return false;
             }
+            if (tile < 0 || tile >= TILE_COUNT) {
+                SDL_Log("Invalid tile ID: %d", tile);
+                return false;
+            }
             rowData.push_back(tile);
         }
         worldMap.push_back(rowData);
+    }
+    int extraTile;
+    if (file>>extraTile) {
+        SDL_Log("Map file contains extra tile data.");
+        return false;
     }
     return true;
 }
@@ -94,14 +98,14 @@ void TileMap::Render(SDL_Renderer* renderer,
 
     int firstColumn = static_cast<int>(cameraX/TILE_SIZE);
     int firstRow = static_cast<int>(cameraY/TILE_SIZE);
-    int visibleColumns = WINDOW_WIDTH/TILE_SIZE;
-    int visibleRows = WINDOW_HEIGHT/TILE_SIZE;
+    int visibleColumns = (WINDOW_WIDTH/TILE_SIZE) + 1;
+    int visibleRows = (WINDOW_HEIGHT/TILE_SIZE) + 1;
 
     int lastRow = std::min(firstRow + visibleRows + 1,
-        mapRows); // static_cast<int>(worldMap.size())
+        mapRows);
 
     int lastColumn = std::min(firstColumn + visibleColumns + 1,
-       mapColumns); // static_cast<int>(worldMap[row].size())
+       mapColumns);
 
     for (int row = firstRow; row < lastRow; row++) {
         for (int column = firstColumn; column < lastColumn; column++) {
