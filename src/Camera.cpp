@@ -22,7 +22,7 @@ void Camera::Update(const SDL_FRect& playerRect,
         const TileMap& tileMap) {
     //Camera tracking player position safely
     cameraX = playerRect.x - windowWidth/2.0f;
-    cameraY = playerRect.y - windowWidth/2.0f;
+    cameraY = playerRect.y - windowHeight/2.0f;
 
 
     if (cameraX < 0.0f) {

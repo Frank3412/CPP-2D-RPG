@@ -34,6 +34,10 @@ SDL_Texture* AssetManager::LoadTexture(SDL_Renderer* renderer,
 
 
 AssetManager::~AssetManager() {
+    Shutdown();
+}
+
+void AssetManager::Shutdown() {
     for (auto& pair : textures)
     {
         SDL_DestroyTexture(pair.second);

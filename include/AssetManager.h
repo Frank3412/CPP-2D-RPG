@@ -12,6 +12,8 @@ public:
     SDL_Texture* LoadTexture(SDL_Renderer* renderer,
         const char* filePath);
 
+    void Shutdown();
+
 
 private:
     std::unordered_map<std::string, SDL_Texture*> textures;

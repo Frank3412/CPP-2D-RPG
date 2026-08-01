@@ -14,7 +14,6 @@ event()
 
 bool Game::Initialize() {
 
-
     // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("SDL failed to initialize: %s", SDL_GetError());
@@ -59,10 +58,12 @@ bool Game::Initialize() {
 
     // Getting TileMap Texture started
     if (!tileMap.Initialize(renderer, assetManager)) {
+        Shutdown();
         return false;
     }
 
     if (!tileMap.LoadMap("../assets/maps/map01.txt")) {
+        Shutdown();
         return false;
     }
 
@@ -123,9 +124,13 @@ void Game::Run() {
 }
 
 void Game::Shutdown() {
+    assetManager.Shutdown();
+
     SDL_DestroyRenderer(renderer);
     renderer = nullptr;
+
     SDL_DestroyWindow(window);
     window = nullptr;
+    
     SDL_Quit();
 }
