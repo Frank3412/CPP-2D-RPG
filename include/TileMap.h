@@ -10,7 +10,6 @@ class TileMap {
     public:
 
     TileMap();
-    ~TileMap();
 
     bool Initialize(SDL_Renderer* renderer,
         AssetManager& assetManager);

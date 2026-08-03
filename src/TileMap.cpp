@@ -66,10 +66,6 @@ bool TileMap::LoadMap(const std::string& filename) {
     return true;
 }
 
-TileMap::~TileMap() {
-   //AssetManager is now responsible for texture destruction.
-}
-
 bool TileMap::Initialize(SDL_Renderer* renderer,
     AssetManager& assetManager) {
 

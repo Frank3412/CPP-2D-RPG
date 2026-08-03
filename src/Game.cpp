@@ -7,7 +7,7 @@ Game::Game()
       renderer(nullptr),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
-previousCounter(SDL_GetPerformanceCounter()),
+previousCounter(0),
 event()
 {
 }
@@ -35,16 +35,19 @@ bool Game::Initialize() {
     //Create the renderer
     renderer = SDL_CreateRenderer(window,nullptr);
 
-    if (renderer) {
-        SDL_SetRenderVSync(renderer, 1);// 1 turns VSync ON in SDL3
-    }
-
     if (!renderer) {
         SDL_Log("Failed to create renderer: %s", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
         return false;
     }
+
+    if (!SDL_SetRenderVSync(renderer,1)) {
+        SDL_Log("Failed to enable VSync: %s", SDL_GetError());
+        Shutdown();
+        return false;
+    }
+
 
     // Player texture initialization
     SDL_Texture* texture =
@@ -102,6 +105,8 @@ void Game::Render() {
 
 void Game::Run() {
 
+    previousCounter = SDL_GetPerformanceCounter();
+
     while (running) {
 
         Uint64 currentCounter = SDL_GetPerformanceCounter();
@@ -131,6 +136,6 @@ void Game::Shutdown() {
 
     SDL_DestroyWindow(window);
     window = nullptr;
-    
+
     SDL_Quit();
 }

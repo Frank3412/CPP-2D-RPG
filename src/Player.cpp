@@ -11,11 +11,8 @@ Player::Player() {
 void Player::SetTexture(SDL_Texture* newTexture) {
     texture = newTexture;
 }
-SDL_FRect& Player::GetRect() {
+const SDL_FRect& Player::GetRect() const {
     return rect;
-}
-SDL_Texture* Player::GetTexture() const {
-    return texture;
 }
 
 SDL_FRect Player::GetCollisionBox() const {

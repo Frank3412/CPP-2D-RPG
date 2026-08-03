@@ -1,4 +1,5 @@
 #include "AssetManager.h"
+#include <SDL3_image/SDL_image.h>
 
 
 SDL_Texture* AssetManager::LoadTexture(SDL_Renderer* renderer,
