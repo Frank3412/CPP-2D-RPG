@@ -59,7 +59,6 @@ bool Game::Initialize() {
     player.SetTexture(texture);
 
 
-    // Getting TileMap Texture started
     if (!tileMap.Initialize(renderer, assetManager)) {
         Shutdown();
         return false;
@@ -94,10 +93,9 @@ void Game::Render() {
         SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
         SDL_RenderClear(renderer);
 
-        // RenderMap is going to be moved to TileMap.cpp
+
         tileMap.Render(renderer, camera.GetX(), camera.GetY());
 
-        //CLEANUP: Player draws itself cleanly now
         player.Render(renderer, camera.GetX(), camera.GetY());
 
         SDL_RenderPresent(renderer);
