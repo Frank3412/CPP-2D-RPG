@@ -50,13 +50,33 @@ bool Game::Initialize() {
 
 
     // Player texture initialization
-    SDL_Texture* texture =
-        assetManager.LoadTexture(renderer,"../assets/player.bmp");
-    if (!texture) {
+    SDL_Texture* walkLeft =
+        assetManager.LoadTexture(renderer,
+            "../assets/player/player_walk_left.bmp");
+    SDL_Texture* walkDown =
+        assetManager.LoadTexture(renderer,
+            "../assets/player/player_walk_down.bmp");
+    SDL_Texture* walkUp =
+        assetManager.LoadTexture(renderer,
+            "../assets/player/player_walk_up.bmp");
+    SDL_Texture* walkRight =
+        assetManager.LoadTexture(renderer,
+            "../assets/player/player_walk_right.bmp");
+
+
+    if (!walkLeft ||
+        !walkDown ||
+        !walkUp ||
+        !walkRight) {
+
         Shutdown();
         return false;
     }
-    player.SetTexture(texture);
+    player.SetWalkingTextures(
+        walkLeft,
+        walkDown,
+        walkUp,
+        walkRight);
 
 
     if (!tileMap.Initialize(renderer, assetManager)) {

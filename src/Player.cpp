@@ -3,13 +3,32 @@
 
 
 Player::Player() {
-    texture = nullptr;
+
+    walkLeftTexture = nullptr;
+    walkDownTexture = nullptr;
+    walkUpTexture = nullptr;
+    walkRightTexture = nullptr;
+
+    direction = Direction::Down;
+    currentFrame = 0;
+
+    animationTimer = 0.0f;
+    animationSpeed = 0.15f;
+
     rect ={0.0f,0.0f,64.0f,64.0f};
     speed = 200.0f;
 }
 
-void Player::SetTexture(SDL_Texture* newTexture) {
-    texture = newTexture;
+void Player::SetWalkingTextures(
+    SDL_Texture* left,
+    SDL_Texture* down,
+    SDL_Texture* up,
+    SDL_Texture* right) {
+
+    walkLeftTexture = left;
+    walkDownTexture = down;
+    walkUpTexture = up;
+    walkRightTexture = right;
 }
 const SDL_FRect& Player::GetRect() const {
     return rect;
@@ -33,15 +52,38 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
     // 1. Calculate the raw step distance for this exact frame
     if (keyboardStates[SDL_SCANCODE_UP]) {
         movementY -= speed * deltaTime;
+        direction = Direction::Up;
     }
     if (keyboardStates[SDL_SCANCODE_DOWN]) {
         movementY += speed * deltaTime;
+        direction = Direction::Down;
     }
     if (keyboardStates[SDL_SCANCODE_LEFT]) {
         movementX -= speed * deltaTime;
+        direction = Direction::Left;
     }
     if (keyboardStates[SDL_SCANCODE_RIGHT]) {
         movementX += speed * deltaTime;
+        direction = Direction::Right;
+    }
+
+    bool isMoving = (movementX != 0.0f || movementY != 0.0f);
+
+    if (isMoving) {
+        animationTimer += deltaTime;
+
+        if (animationTimer >= animationSpeed) {
+            animationTimer -= animationSpeed;
+            currentFrame++;
+
+            if (currentFrame >= 4) {
+                currentFrame = 0;
+            }
+        }
+    }
+    else {
+        currentFrame = 0;
+        animationTimer = 0.0f;
     }
 
     // 2. Map boundary check *before* modifying position to prevent
@@ -85,11 +127,36 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
 
 void Player::Render(SDL_Renderer* renderer,
     float cameraX, float cameraY) {
+
     SDL_FRect screenRect = rect;
     screenRect.x -= cameraX;
     screenRect.y -= cameraY;
 
-    SDL_RenderTexture(renderer, texture,
-        nullptr, &screenRect);
+    SDL_Texture* currentTexture = walkDownTexture;
+
+    switch (direction) {
+        case Direction::Left:
+            currentTexture = walkLeftTexture;
+            break;
+        case Direction::Right:
+            currentTexture = walkRightTexture;
+            break;
+        case Direction::Up:
+            currentTexture = walkUpTexture;
+            break;
+        case Direction::Down:
+            currentTexture = walkDownTexture;
+            break;
+    }
+
+    SDL_FRect sourceRect{
+    static_cast<float>(currentFrame*64),
+        0.0f,
+        64.0f,
+        64.0f
+    };
+
+    SDL_RenderTexture(renderer, currentTexture,
+        &sourceRect, &screenRect);
 }
 

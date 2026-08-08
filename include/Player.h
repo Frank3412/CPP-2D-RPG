@@ -7,7 +7,11 @@ class TileMap;
 class Player {
 public:
     Player();
-    void SetTexture(SDL_Texture* newTexture);
+    void SetWalkingTextures(
+        SDL_Texture* left,
+        SDL_Texture* down,
+        SDL_Texture* up,
+        SDL_Texture* right);
 
     // We will now pass the collision map bounds/checking function context
     // to Update
@@ -21,7 +25,24 @@ public:
 private:
     SDL_FRect GetCollisionBox() const;
 
-    SDL_Texture* texture;
+    enum class Direction {
+        Down,
+          Up,
+          Left,
+          Right
+      };
+
+    Direction direction;
+    int currentFrame;
+
+    float animationTimer;
+    float animationSpeed;
+
+    SDL_Texture* walkLeftTexture;
+    SDL_Texture* walkDownTexture;
+    SDL_Texture* walkUpTexture;
+    SDL_Texture* walkRightTexture;
+
     SDL_FRect rect;
     float speed;
 
