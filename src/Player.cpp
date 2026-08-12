@@ -9,26 +9,43 @@ Player::Player() {
     walkUpTexture = nullptr;
     walkRightTexture = nullptr;
 
+    idleLeftTexture = nullptr;
+    idleDownTexture = nullptr;
+    idleUpTexture = nullptr;
+    idleRightTexture = nullptr;
+
     direction = Direction::Down;
+    animationState = AnimationState::Idle;
     currentFrame = 0;
 
     animationTimer = 0.0f;
     animationSpeed = 0.15f;
+    idleAnimationSpeed = 0.30f;
 
     rect ={0.0f,0.0f,64.0f,64.0f};
     speed = 200.0f;
 }
 
-void Player::SetWalkingTextures(
-    SDL_Texture* left,
-    SDL_Texture* down,
-    SDL_Texture* up,
-    SDL_Texture* right) {
+void Player::SetAnimationTextures(
+    SDL_Texture* walkLeft,
+    SDL_Texture* walkDown,
+    SDL_Texture* walkUp,
+    SDL_Texture* walkRight,
+    SDL_Texture* idleLeft,
+    SDL_Texture* idleDown,
+    SDL_Texture* idleUp,
+    SDL_Texture* idleRight) {
 
-    walkLeftTexture = left;
-    walkDownTexture = down;
-    walkUpTexture = up;
-    walkRightTexture = right;
+    walkLeftTexture = walkLeft;
+    walkDownTexture = walkDown;
+    walkUpTexture = walkUp;
+    walkRightTexture = walkRight;
+
+    idleLeftTexture = idleLeft;
+    idleDownTexture = idleDown;
+    idleUpTexture = idleUp;
+    idleRightTexture = idleRight;
+
 }
 const SDL_FRect& Player::GetRect() const {
     return rect;
@@ -70,6 +87,13 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
     bool isMoving = (movementX != 0.0f || movementY != 0.0f);
 
     if (isMoving) {
+        animationState = AnimationState::Walking;
+    }
+    else {
+        animationState = AnimationState::Idle;
+    }
+
+    if (isMoving) {
         animationTimer += deltaTime;
 
         if (animationTimer >= animationSpeed) {
@@ -82,8 +106,14 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
         }
     }
     else {
-        currentFrame = 0;
-        animationTimer = 0.0f;
+        animationTimer += deltaTime;
+        if (animationTimer >= idleAnimationSpeed) {
+            animationTimer -= idleAnimationSpeed;
+            currentFrame++;
+            if (currentFrame >= 4) {
+                currentFrame = 0;
+            }
+        }
     }
 
     // 2. Map boundary check *before* modifying position to prevent
@@ -132,22 +162,42 @@ void Player::Render(SDL_Renderer* renderer,
     screenRect.x -= cameraX;
     screenRect.y -= cameraY;
 
-    SDL_Texture* currentTexture = walkDownTexture;
+    SDL_Texture* currentTexture = idleDownTexture;
 
-    switch (direction) {
-        case Direction::Left:
-            currentTexture = walkLeftTexture;
-            break;
-        case Direction::Right:
-            currentTexture = walkRightTexture;
-            break;
-        case Direction::Up:
-            currentTexture = walkUpTexture;
-            break;
-        case Direction::Down:
-            currentTexture = walkDownTexture;
-            break;
+    if (animationState == AnimationState::Walking) {
+
+        switch (direction) {
+            case Direction::Left:
+                currentTexture = walkLeftTexture;
+                break;
+            case Direction::Right:
+                currentTexture = walkRightTexture;
+                break;
+            case Direction::Up:
+                currentTexture = walkUpTexture;
+                break;
+            case Direction::Down:
+                currentTexture = walkDownTexture;
+                break;
+        }
     }
+    else {
+        switch (direction) {
+            case Direction::Left:
+                currentTexture = idleLeftTexture;
+                break;
+            case Direction::Right:
+                currentTexture = idleRightTexture;
+                break;
+            case Direction::Up:
+                currentTexture = idleUpTexture;
+                break;
+            case Direction::Down:
+                currentTexture = idleDownTexture;
+                break;
+        }
+    }
+
 
     SDL_FRect sourceRect{
     static_cast<float>(currentFrame*64),
