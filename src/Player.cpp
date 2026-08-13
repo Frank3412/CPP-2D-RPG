@@ -90,6 +90,10 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
         animationState = AnimationState::Walking;
     }
     else {
+        if (animationState == AnimationState::Walking) {
+            currentFrame = 0;
+            animationTimer = 0.0f;
+        }
         animationState = AnimationState::Idle;
     }
 
