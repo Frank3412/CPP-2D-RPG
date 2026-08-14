@@ -4,6 +4,7 @@
 #include "TileMap.h"
 #include "Player.h"
 #include "Camera.h"
+#include "Sign.h"
 #include <SDL3/SDL.h>
 
 
@@ -22,6 +23,7 @@ private:
     AssetManager assetManager;
     TileMap tileMap;
     Player player;
+    Sign sign;
     Camera camera;
     bool running;
     Uint64 previousCounter;

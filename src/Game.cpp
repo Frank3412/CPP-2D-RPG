@@ -5,10 +5,14 @@
 Game::Game()
     : window(nullptr),
       renderer(nullptr),
+assetManager(),
+tileMap(),
+player(),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
 previousCounter(0),
-event()
+event(),
+sign(640.0f,192.0f)
 {
 }
 
@@ -100,6 +104,17 @@ bool Game::Initialize() {
         idleUp,
         idleRight);
 
+    SDL_Texture* signTexture =
+        assetManager.LoadTexture(
+            renderer,
+            "../assets/objects/sign.bmp");
+
+    if (!signTexture) {
+        Shutdown();
+        return false;
+    }
+
+    sign.SetTexture(signTexture);
 
     if (!tileMap.Initialize(renderer, assetManager)) {
         Shutdown();
@@ -137,6 +152,8 @@ void Game::Render() {
 
 
         tileMap.Render(renderer, camera.GetX(), camera.GetY());
+
+        sign.Render(renderer, camera.GetX(), camera.GetY());
 
         player.Render(renderer, camera.GetX(), camera.GetY());
 

@@ -14,6 +14,8 @@ add_executable(PracticeCode
         src/Camera.cpp
         src/AssetManager.cpp
         src/Game.cpp
+        src/InteractableObject.cpp
+        src/Sign.cpp
 )
 
 target_include_directories(
