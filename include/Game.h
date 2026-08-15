@@ -26,6 +26,9 @@ private:
     Sign sign;
     Camera camera;
     bool running;
+    bool signInRange;
+    bool interactPressed;
+    bool interactKeyDown;
     Uint64 previousCounter;
     SDL_Event event;
     void ProcessInput();

@@ -10,6 +10,9 @@ tileMap(),
 player(),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
+signInRange(false),
+interactPressed(false),
+interactKeyDown(false),
 previousCounter(0),
 event(),
 sign(640.0f,192.0f)
@@ -130,9 +133,23 @@ bool Game::Initialize() {
 }
 
 void Game::ProcessInput() {
+
+    interactPressed = false;
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
             running = false;
+        }
+        if (event.type == SDL_EVENT_KEY_DOWN) {
+            if (event.key.key == SDLK_E && !interactKeyDown) {
+                interactKeyDown = true;
+                interactPressed = true;
+            }
+        }
+        if (event.type == SDL_EVENT_KEY_UP) {
+            if (event.key.key == SDLK_E) {
+                interactKeyDown = false;
+            }
         }
     }
 }
@@ -140,6 +157,13 @@ void Game::ProcessInput() {
 void Game::Update(float deltaTime) {
 
     player.Update(deltaTime, tileMap);
+
+    signInRange = sign.IsInInteractionRange(player.GetRect());
+
+    if (signInRange && interactPressed) {
+        SDL_Log("Sign interacted with.");
+    }
+
     camera.Update(player.GetRect(), tileMap);
 
 }
