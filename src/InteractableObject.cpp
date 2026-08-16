@@ -38,6 +38,10 @@ bool InteractableObject::IsInInteractionRange(
                 otherRect.y + otherRect.h > interactionRect.y;
 }
 
+void InteractableObject::Interact() {
+    // Will add code here in a minute.
+}
+
 void InteractableObject::SetTexture(SDL_Texture* texture) {
     this->texture = texture;
 }

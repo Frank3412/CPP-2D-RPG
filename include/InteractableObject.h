@@ -12,6 +12,8 @@ class InteractableObject {
 
     bool IsInInteractionRange(const SDL_FRect& otherRect) const;
 
+    virtual void Interact();
+
     void SetTexture(SDL_Texture* texture);
 
     void Render(SDL_Renderer* renderer,

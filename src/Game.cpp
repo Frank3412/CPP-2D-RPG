@@ -161,7 +161,7 @@ void Game::Update(float deltaTime) {
     signInRange = sign.IsInInteractionRange(player.GetRect());
 
     if (signInRange && interactPressed) {
-        SDL_Log("Sign interacted with.");
+        sign.Interact();
     }
 
     camera.Update(player.GetRect(), tileMap);
