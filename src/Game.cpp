@@ -15,7 +15,7 @@ interactPressed(false),
 interactKeyDown(false),
 previousCounter(0),
 event(),
-sign(640.0f,192.0f)
+sign(640.0f,192.0f, "Welcome to Monster Quest!")
 {
 }
 
