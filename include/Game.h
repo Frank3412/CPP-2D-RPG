@@ -5,7 +5,9 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Sign.h"
+#include "DialogueManager.h"
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 
 class Game {
@@ -24,6 +26,9 @@ private:
     TileMap tileMap;
     Player player;
     Sign sign;
+    DialogueManager dialogueManager;
+    TTF_Font* font;
+    SDL_Texture* dialogueTextTexture;
     Camera camera;
     bool running;
     bool signInRange;
@@ -34,4 +39,5 @@ private:
     void ProcessInput();
     void Update(float deltaTime);
     void Render();
+    void CreateDialogueTextTexture();
 };

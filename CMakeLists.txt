@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
+find_package(SDL3_ttf CONFIG REQUIRED)
 
 add_executable(PracticeCode
         src/main.cpp
@@ -16,6 +17,7 @@ add_executable(PracticeCode
         src/Game.cpp
         src/InteractableObject.cpp
         src/Sign.cpp
+        src/DialogueManager.cpp
 )
 
 target_include_directories(
@@ -29,4 +31,5 @@ target_link_libraries(
         PRIVATE
         SDL3::SDL3
         SDL3_image::SDL3_image
+        SDL3_ttf::SDL3_ttf
 )

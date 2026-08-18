@@ -8,14 +8,17 @@ Game::Game()
 assetManager(),
 tileMap(),
 player(),
+sign(640.0f,192.0f, "Welcome to Monster Quest!"),
+dialogueManager(),
+font(nullptr),
+dialogueTextTexture(nullptr),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
 signInRange(false),
 interactPressed(false),
 interactKeyDown(false),
 previousCounter(0),
-event(),
-sign(640.0f,192.0f, "Welcome to Monster Quest!")
+event()
 {
 }
 
@@ -24,6 +27,13 @@ bool Game::Initialize() {
     // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("SDL failed to initialize: %s", SDL_GetError());
+        return false;
+    }
+
+    // Initialize SDL_ttf
+    if (!TTF_Init()) {
+        SDL_Log("SDL_ttf failed to initialize: %s", SDL_GetError());
+        SDL_Quit();
         return false;
     }
 
@@ -55,6 +65,16 @@ bool Game::Initialize() {
         return false;
     }
 
+    // Load dialogue font
+    font = TTF_OpenFont(
+        "../assets/fonts/rubik_regular.ttf",
+        24.0f);
+
+    if (!font) {
+        SDL_Log("Failed to load font: %s", SDL_GetError());
+        Shutdown();
+        return false;
+    }
 
     // Player walking texture initialization
     SDL_Texture* walkLeft =
@@ -160,28 +180,126 @@ void Game::Update(float deltaTime) {
 
     signInRange = sign.IsInInteractionRange(player.GetRect());
 
-    if (signInRange && interactPressed) {
-        sign.Interact();
+    if (interactPressed) {
+        if (dialogueManager.IsActive()) {
+            dialogueManager.StopDialogue();
+
+            if (dialogueTextTexture) {
+                SDL_DestroyTexture(dialogueTextTexture);
+                dialogueTextTexture = nullptr;
+            }
+        }
+        else if (signInRange) {
+            dialogueManager.StartDialogue(
+                sign.GetMessage());
+
+            CreateDialogueTextTexture();
+        }
     }
 
     camera.Update(player.GetRect(), tileMap);
+}
 
+void Game::CreateDialogueTextTexture() {
+
+    if (dialogueTextTexture) {
+        SDL_DestroyTexture(dialogueTextTexture);
+        dialogueTextTexture = nullptr;
+    }
+
+    SDL_Color textColor{
+    255,
+    255,
+    255,
+    255
+    };
+
+    SDL_Surface* textSurface =
+        TTF_RenderText_Blended(
+            font,
+            dialogueManager.GetCurrentText().c_str(),
+            0,
+            textColor);
+
+    if (!textSurface) {
+        SDL_Log(
+            "Failed to render dialogue text: %s",
+            SDL_GetError());
+        return;
+    }
+
+    dialogueTextTexture =
+        SDL_CreateTextureFromSurface(
+            renderer,
+            textSurface);
+
+    SDL_DestroySurface(textSurface);
+
+    if (!dialogueTextTexture) {
+        SDL_Log(
+            "Failed to create dialogue text texture: %s",
+            SDL_GetError());
+    }
 }
 
 void Game::Render() {
 
     // Render pass
-        SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
-        SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
+    SDL_RenderClear(renderer);
 
 
-        tileMap.Render(renderer, camera.GetX(), camera.GetY());
+    tileMap.Render(renderer, camera.GetX(), camera.GetY());
 
-        sign.Render(renderer, camera.GetX(), camera.GetY());
+    sign.Render(renderer, camera.GetX(), camera.GetY());
 
-        player.Render(renderer, camera.GetX(), camera.GetY());
+    player.Render(renderer, camera.GetX(), camera.GetY());
 
-        SDL_RenderPresent(renderer);
+    if (dialogueManager.IsActive()) {
+
+        //Dialogue box background
+        SDL_FRect dialogueBox{
+            40.0f,
+            WINDOW_HEIGHT - 150.0f,
+            WINDOW_WIDTH - 80.0f,
+            110.0f
+        };
+
+        SDL_SetRenderDrawColor(
+            renderer,
+            20,
+            20,
+            20,
+            230);
+
+        SDL_RenderFillRect(
+            renderer,
+            &dialogueBox);
+
+        if (dialogueTextTexture) {
+            float textWidth;
+            float textHeight;
+
+            SDL_GetTextureSize(
+                dialogueTextTexture,
+                &textWidth,
+                &textHeight);
+
+            SDL_FRect textRect{
+            dialogueBox.x + 20.0f,
+            dialogueBox.y + 20.0f,
+            textWidth,
+            textHeight
+            };
+
+            SDL_RenderTexture(
+                renderer,
+                dialogueTextTexture,
+                nullptr,
+                &textRect);
+        }
+    }
+    SDL_RenderPresent(renderer);
 }
 
 void Game::Run() {
@@ -211,6 +329,18 @@ void Game::Run() {
 
 void Game::Shutdown() {
     assetManager.Shutdown();
+
+    if (dialogueTextTexture) {
+        SDL_DestroyTexture(dialogueTextTexture);
+        dialogueTextTexture = nullptr;
+    }
+
+    if (font) {
+        TTF_CloseFont(font);
+        font = nullptr;
+    }
+
+    TTF_Quit();
 
     SDL_DestroyRenderer(renderer);
     renderer = nullptr;
