@@ -175,13 +175,17 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(float deltaTime) {
+    
+    if (!dialogueManager.IsActive()) {
 
-    player.Update(deltaTime, tileMap);
+        player.Update(deltaTime, tileMap);
+        camera.Update(player.GetRect(), tileMap);
+
+    }
 
     signInRange = sign.IsInInteractionRange(player.GetRect());
 
     if (interactPressed) {
-        //
         if (dialogueManager.IsActive()) {
 
             dialogueManager.AdvanceDialogue();
@@ -198,7 +202,6 @@ void Game::Update(float deltaTime) {
                     }
                 }
             }
-        //
         else if (signInRange) {
             dialogueManager.StartDialogue({
             "Welcome to Monster Quest!",
@@ -209,8 +212,6 @@ void Game::Update(float deltaTime) {
             CreateDialogueTextTexture();
         }
     }
-
-    camera.Update(player.GetRect(), tileMap);
 }
 
 void Game::CreateDialogueTextTexture() {
