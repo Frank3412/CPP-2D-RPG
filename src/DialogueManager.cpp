@@ -2,18 +2,54 @@
 
 DialogueManager::DialogueManager()
     : active(false),
-currentText("") {
+dialogueLines(),
+currentLine(0){
 
 }
 
 void DialogueManager::StartDialogue(const std::string& text) {
-    currentText = text;
+
+    dialogueLines.clear();
+
+    dialogueLines.push_back(text);
+
+    currentLine = 0;
     active = true;
 }
 
+void DialogueManager::StartDialogue(
+    const std::vector<std::string>& lines) {
+
+   dialogueLines = lines;
+
+    currentLine = 0;
+
+    if (dialogueLines.empty()) {
+        active = false;
+        return;
+    }
+    active = true;
+}
+
+void DialogueManager::AdvanceDialogue() {
+
+    if (!active || dialogueLines.empty()) {
+        return;
+    }
+
+    if (currentLine + 1 < dialogueLines.size()) {
+        currentLine++;
+    }
+    else {
+        StopDialogue();
+    }
+}
+
 void DialogueManager::StopDialogue() {
+
     active = false;
-    currentText.clear();
+    dialogueLines.clear();
+    currentLine = 0;
 }
 
 bool DialogueManager::IsActive() const {
@@ -21,5 +57,12 @@ bool DialogueManager::IsActive() const {
 }
 
 const std::string& DialogueManager::GetCurrentText() const {
-    return currentText;
+
+    static const std::string emptyText;
+
+    if (dialogueLines.empty()) {
+        return emptyText;
+    }
+
+    return dialogueLines[currentLine];
 }

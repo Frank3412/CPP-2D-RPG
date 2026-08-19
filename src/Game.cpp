@@ -181,17 +181,30 @@ void Game::Update(float deltaTime) {
     signInRange = sign.IsInInteractionRange(player.GetRect());
 
     if (interactPressed) {
+        //
         if (dialogueManager.IsActive()) {
-            dialogueManager.StopDialogue();
 
-            if (dialogueTextTexture) {
-                SDL_DestroyTexture(dialogueTextTexture);
-                dialogueTextTexture = nullptr;
+            dialogueManager.AdvanceDialogue();
+
+            if (dialogueManager.IsActive()) {
+
+                CreateDialogueTextTexture();
             }
-        }
+            else {
+
+                if (dialogueTextTexture) {
+                        SDL_DestroyTexture(dialogueTextTexture);
+                        dialogueTextTexture = nullptr;
+                    }
+                }
+            }
+        //
         else if (signInRange) {
-            dialogueManager.StartDialogue(
-                sign.GetMessage());
+            dialogueManager.StartDialogue({
+            "Welcome to Monster Quest!",
+            "There is much to discover in this world.",
+            "Your adventure is just beginning."
+            });
 
             CreateDialogueTextTexture();
         }
