@@ -2,18 +2,28 @@
 
 Sign::Sign(
     float x,
-    float y,
-    const std::string& message)
+    float y)
     : InteractableObject(x,y, 32.0f,32.0f),
-message(message)
+dialogue(CreateDefaultDialogue())
 {
-
 }
 
 void Sign::Interact() {
-    SDL_Log("%s", message.c_str());
+    if (!dialogue.lines.empty()) {
+        SDL_Log("%s", dialogue.lines[0].c_str());
+    }
 }
 
-const std::string& Sign::GetMessage() const {
-    return message;
+const DialogueData& Sign::GetDialogue() const {
+    return dialogue;
+}
+
+DialogueData Sign::CreateDefaultDialogue() const {
+    return DialogueData{
+        {
+            "Welcome to Monster Quest!",
+            "There is much to discover in this world.",
+            "Your adventure is just beginning."
+        }
+    };
 }

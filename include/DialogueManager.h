@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DialogueData.h"
 #include <string>
 #include <vector>
 
@@ -9,6 +10,7 @@ class DialogueManager {
 
     void StartDialogue(const std::string& text);
     void StartDialogue(const std::vector<std::string>& lines);
+    void StartDialogue(const DialogueData& dialogue);
 
     void AdvanceDialogue();
     void StopDialogue();

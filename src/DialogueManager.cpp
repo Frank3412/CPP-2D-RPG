@@ -31,6 +31,21 @@ void DialogueManager::StartDialogue(
     active = true;
 }
 
+void DialogueManager::StartDialogue(
+const DialogueData& dialogue) {
+
+    dialogueLines = dialogue.lines;
+
+    currentLine = 0;
+
+    if (dialogueLines.empty()) {
+        active = false;
+        return;
+    }
+
+    active = true;
+}
+
 void DialogueManager::AdvanceDialogue() {
 
     if (!active || dialogueLines.empty()) {

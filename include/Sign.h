@@ -1,16 +1,18 @@
 #pragma once
 
 #include "InteractableObject.h"
-#include <string>
+#include "DialogueData.h"
 
 class Sign : public InteractableObject {
     public:
-    Sign(float x, float y, const std::string& message);
+    Sign(float x, float y);
 
     void Interact() override;
 
-    const std::string& GetMessage() const;
+    const DialogueData& GetDialogue() const;
 
     private:
-    std::string message;
+    DialogueData dialogue;
+
+    DialogueData CreateDefaultDialogue() const;
 };

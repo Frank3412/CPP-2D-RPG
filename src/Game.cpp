@@ -8,7 +8,7 @@ Game::Game()
 assetManager(),
 tileMap(),
 player(),
-sign(640.0f,192.0f, "Welcome to Monster Quest!"),
+sign(640.0f,192.0f),
 dialogueManager(),
 font(nullptr),
 dialogueTextTexture(nullptr),
@@ -175,7 +175,7 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(float deltaTime) {
-    
+
     if (!dialogueManager.IsActive()) {
 
         player.Update(deltaTime, tileMap);
@@ -203,11 +203,7 @@ void Game::Update(float deltaTime) {
                 }
             }
         else if (signInRange) {
-            dialogueManager.StartDialogue({
-            "Welcome to Monster Quest!",
-            "There is much to discover in this world.",
-            "Your adventure is just beginning."
-            });
+            dialogueManager.StartDialogue(sign.GetDialogue());
 
             CreateDialogueTextTexture();
         }
