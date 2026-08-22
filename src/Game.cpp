@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Constants.h"
+#include <vector>
 
 
 Game::Game()
@@ -9,17 +10,27 @@ assetManager(),
 tileMap(),
 player(),
 sign(640.0f,192.0f),
+rat(720.0f, 192.0f, DialogueData{
+    {
+        "The dungeon goes deeper than you think.",
+        "I've been down there more times than I can count.",
+        "If you're going in, watch your step."
+    }
+}),
+npcs(),
 dialogueManager(),
 font(nullptr),
 dialogueTextTexture(nullptr),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
 signInRange(false),
+ratInRange(false),
 interactPressed(false),
 interactKeyDown(false),
 previousCounter(0),
 event()
 {
+    npcs.push_back(&rat);
 }
 
 bool Game::Initialize() {
@@ -139,6 +150,19 @@ bool Game::Initialize() {
 
     sign.SetTexture(signTexture);
 
+    // Rat texture
+    SDL_Texture* ratTexture =
+        assetManager.LoadTexture(
+            renderer,
+            "../assets/npcs/rat/rat.bmp");
+
+    if (!ratTexture) {
+        Shutdown();
+        return false;
+    }
+
+    rat.SetTexture(ratTexture);
+
     if (!tileMap.Initialize(renderer, assetManager)) {
         Shutdown();
         return false;
@@ -178,12 +202,26 @@ void Game::Update(float deltaTime) {
 
     if (!dialogueManager.IsActive()) {
 
-        player.Update(deltaTime, tileMap);
-        camera.Update(player.GetRect(), tileMap);
+        std::vector<SDL_FRect> solidObjects;
+
+        for (const NPC* npc: npcs) {
+            solidObjects.push_back(
+                npc->GetCollisionBox());
+        }
+
+        player.Update(
+            deltaTime,
+            tileMap,
+            solidObjects);
+
+        camera.Update(
+            player.GetRect(),
+            tileMap);
 
     }
 
     signInRange = sign.IsInInteractionRange(player.GetRect());
+    ratInRange = rat.IsInNPCInteractionRange(player.GetRect());
 
     if (interactPressed) {
         if (dialogueManager.IsActive()) {
@@ -204,6 +242,11 @@ void Game::Update(float deltaTime) {
             }
         else if (signInRange) {
             dialogueManager.StartDialogue(sign.GetDialogue());
+
+            CreateDialogueTextTexture();
+        }
+        else if (ratInRange) {
+            dialogueManager.StartDialogue(rat.GetDialogue());
 
             CreateDialogueTextTexture();
         }
@@ -262,6 +305,8 @@ void Game::Render() {
     tileMap.Render(renderer, camera.GetX(), camera.GetY());
 
     sign.Render(renderer, camera.GetX(), camera.GetY());
+
+    rat.Render(renderer, camera.GetX(), camera.GetY());
 
     player.Render(renderer, camera.GetX(), camera.GetY());
 

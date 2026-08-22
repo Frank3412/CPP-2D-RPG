@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <vector>
 
 class TileMap;
 
@@ -19,7 +20,11 @@ public:
 
     // We will now pass the collision map bounds/checking function context
     // to Update
-    void Update(float deltaTime, const TileMap& tileMap);
+    void Update(
+        float deltaTime,
+        const TileMap& tileMap,
+        const std::vector<SDL_FRect>& solidObjects);
+
     void Render(SDL_Renderer* renderer,
         float cameraX,
         float cameraY);

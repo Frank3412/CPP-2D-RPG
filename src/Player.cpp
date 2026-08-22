@@ -61,7 +61,11 @@ SDL_FRect Player::GetCollisionBox() const {
     return collisionBox;
 }
 
-void Player::Update(float deltaTime, const TileMap& tileMap) {
+void Player::Update(
+    float deltaTime,
+    const TileMap& tileMap,
+    const std::vector<SDL_FRect>& solidObjects) {
+
     const bool* keyboardStates = SDL_GetKeyboardState(nullptr);
     float movementX = 0.0f;
     float movementY = 0.0f;
@@ -147,14 +151,42 @@ void Player::Update(float deltaTime, const TileMap& tileMap) {
     // Test X Axis movement safely
     SDL_FRect testX = GetCollisionBox();
     testX.x += movementX;
-    if (!tileMap.CheckCollision(testX)) {
+
+    bool blockedX = tileMap.CheckCollision(testX);
+
+    if (!blockedX) {
+        for (const SDL_FRect& solidObject:solidObjects) {
+            if (SDL_HasRectIntersectionFloat(
+                &testX,
+                &solidObject)){
+
+                blockedX = true;
+                break;
+                }
+        }
+    }
+    if (!blockedX) {
         rect.x = nextRect.x;
     }
 
     // Test Y Axis movement safely
     SDL_FRect testY = GetCollisionBox();
     testY.y += movementY;
-    if (!tileMap.CheckCollision(testY)) {
+
+    bool blockedY = tileMap.CheckCollision(testY);
+
+    if (!blockedY) {
+
+        for (const SDL_FRect& solidObject:solidObjects) {
+            if (SDL_HasRectIntersectionFloat(
+                &testY,
+                &solidObject)) {
+                blockedY = true;
+                break;
+            }
+        }
+    }
+    if (!blockedY) {
         rect.y = nextRect.y;
     }
 }

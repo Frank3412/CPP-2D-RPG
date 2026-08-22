@@ -18,6 +18,7 @@ add_executable(PracticeCode
         src/InteractableObject.cpp
         src/Sign.cpp
         src/DialogueManager.cpp
+        src/NPC.cpp
 )
 
 target_include_directories(
