@@ -32,20 +32,34 @@ class TileMap {
     static constexpr int TILE_TREE = 3;
     static constexpr int TILE_WATER = 4;
     static constexpr int TILE_HOUSE = 5;
+    static constexpr int TILE_DIRT = 6;
 
-    static constexpr int TILE_COUNT = 6;
+    static constexpr int TILE_COUNT = 7;
 
     static constexpr int TILE_SIZE = 32;
 
+    static constexpr int GRASS_VARIANTS = 4;
+    static constexpr int STONE_VARIANTS = 3;
+    static constexpr int DIRT_VARIANTS = 3;
 
-    std::vector<std::vector<int> > worldMap;
+    static constexpr int GRASS_DIRT_TRANSITIONS = 8;
+
+    std::vector<std::vector<int>> worldMap;
+    std::vector<std::vector<int>> tileVariants;
     int mapColumns = 0;
     int mapRows = 0;
 
 
     SDL_Texture* tileTextures[TILE_COUNT];
 
+    SDL_Texture* grassTextures[GRASS_VARIANTS];
+    SDL_Texture* stoneTextures[STONE_VARIANTS];
+    SDL_Texture* dirtTextures[DIRT_VARIANTS];
+
+    SDL_Texture* grassDirtTransitions[GRASS_DIRT_TRANSITIONS];
+
     bool IsSolidTile(int tile) const;
+    bool IsGrassTile(int row, int column) const;
 
     bool LoadTextures(SDL_Renderer* renderer,
         AssetManager& assetManager);
