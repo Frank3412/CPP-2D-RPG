@@ -17,6 +17,13 @@ rat(720.0f, 192.0f, DialogueData{
         "If you're going in, watch your step."
     }
 }),
+eska(800.0f, 192.0f, DialogueData{
+    {
+        "Hello, traveler.",
+        "You are at the surface, and the dungeon is on the other side.",
+        "You will need to speak to the Elves if you want to in to the dungeon."
+    }
+}),
 npcs(),
 dialogueManager(),
 font(nullptr),
@@ -24,13 +31,13 @@ dialogueTextTexture(nullptr),
 camera(WINDOW_WIDTH,WINDOW_HEIGHT),
 running(true),
 signInRange(false),
-ratInRange(false),
 interactPressed(false),
 interactKeyDown(false),
 previousCounter(0),
 event()
 {
     npcs.push_back(&rat);
+    npcs.push_back(&eska);
 }
 
 bool Game::Initialize() {
@@ -163,6 +170,18 @@ bool Game::Initialize() {
 
     rat.SetTexture(ratTexture);
 
+    // Eska Texture
+    SDL_Texture* eskaTexture =
+        assetManager.LoadTexture(
+            renderer,
+            "../assets/npcs/eska/eska.bmp");
+
+    if (!eskaTexture) {
+        Shutdown();
+        return false;
+    }
+    eska.SetTexture(eskaTexture);
+
     if (!tileMap.Initialize(renderer, assetManager)) {
         Shutdown();
         return false;
@@ -221,7 +240,15 @@ void Game::Update(float deltaTime) {
     }
 
     signInRange = sign.IsInInteractionRange(player.GetRect());
-    ratInRange = rat.IsInNPCInteractionRange(player.GetRect());
+
+    NPC* npcInRange = nullptr;
+
+    for (NPC* npc: npcs) {
+        if (npc->IsInNPCInteractionRange(player.GetRect())) {
+            npcInRange = npc;
+            break;
+        }
+    }
 
     if (interactPressed) {
         if (dialogueManager.IsActive()) {
@@ -245,8 +272,8 @@ void Game::Update(float deltaTime) {
 
             CreateDialogueTextTexture();
         }
-        else if (ratInRange) {
-            dialogueManager.StartDialogue(rat.GetDialogue());
+        else if (npcInRange) {
+            dialogueManager.StartDialogue(npcInRange->GetDialogue());
 
             CreateDialogueTextTexture();
         }
@@ -306,7 +333,9 @@ void Game::Render() {
 
     sign.Render(renderer, camera.GetX(), camera.GetY());
 
-    rat.Render(renderer, camera.GetX(), camera.GetY());
+    for (NPC* npc: npcs) {
+        npc->Render(renderer, camera.GetX(), camera.GetY());
+    }
 
     player.Render(renderer, camera.GetX(), camera.GetY());
 

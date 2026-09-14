@@ -29,6 +29,7 @@ private:
     Player player;
     Sign sign;
     NPC rat;
+    NPC eska;
     std::vector<NPC*> npcs;
     DialogueManager dialogueManager;
     TTF_Font* font;
@@ -36,7 +37,6 @@ private:
     Camera camera;
     bool running;
     bool signInRange;
-    bool ratInRange;
     bool interactPressed;
     bool interactKeyDown;
     Uint64 previousCounter;

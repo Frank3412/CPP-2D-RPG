@@ -190,9 +190,6 @@ bool TileMap::LoadTextures(SDL_Renderer* renderer,
                 stoneTextures[2] &&
             tileTextures[TILE_TREE] &&
                 tileTextures[TILE_WATER]&&
-                    stoneTextures[0] &&
-                        stoneTextures[1] &&
-                            stoneTextures[2] &&
                                 grassDirtTransitions[0] &&
                                     grassDirtTransitions[1] &&
                                         grassDirtTransitions[2] &&
@@ -283,6 +280,7 @@ void TileMap::Render(SDL_Renderer* renderer,
                         nullptr,
                         &tileRect);
                 }
+                // i'm going to remove the else in else if to see if that works.
                 else if (grassAbove && grassRight &&
                     grassDirtTransitions[5] != nullptr) {
 

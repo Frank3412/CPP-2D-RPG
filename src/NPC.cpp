@@ -4,13 +4,13 @@ NPC::NPC(
     float x,
     float y,
     const DialogueData& dialogue)
-        : InteractableObject(x,y,32.0f,32.0f),
+        : InteractableObject(x,y,64.0f,64.0f),
 dialogue(dialogue),
 collisionBox{
-    x+6.0f,
-y+ 8.0f,
+    x+22.0f,
+y+ 42.0f,
 20.0f,
-20.0f
+40.0f
 },
 interactionRect{
 x-24.0f,
