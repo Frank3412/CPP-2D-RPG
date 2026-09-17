@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Constants.h"
+#include "TiledLevel.h"
 #include <vector>
 
 
@@ -192,6 +193,13 @@ bool Game::Initialize() {
         return false;
     }
 
+    TiledLevel tiledLevel;
+
+    if (!tiledLevel.LoadMap(
+        "../assets/maps/dungeon_hub_embedded.tmj")) {
+        Shutdown();
+        return false;
+    }
     return true;
 }
 

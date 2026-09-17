@@ -13,6 +13,22 @@ struct MapLayer {
     std::vector<int> tileData;
 };
 
+struct TileSetInfo {
+    int firstGid = 0;
+
+    std::string name;
+    std::string image;
+
+    int imageWidth = 0;
+    int imageHeight = 0;
+
+    int tileWidth = 0;
+    int tileHeight = 0;
+
+    int columns = 0;
+    int tileCount = 0;
+};
+
 class TiledLevel {
     public:
     TiledLevel();
@@ -34,4 +50,5 @@ class TiledLevel {
     int tileHeight;
 
    std::vector<MapLayer> layers;
+    std::vector<TileSetInfo> tilesets;
 };
