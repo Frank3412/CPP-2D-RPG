@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Sign.h"
 #include "NPC.h"
+#include "Enemy.h"
 #include "DialogueManager.h"
 
 #include <SDL3/SDL.h>
@@ -39,6 +40,8 @@ private:
     NPC rat;
     NPC eska;
     std::vector<NPC*> npcs;
+    // Enemy system
+    Enemy bat;
     DialogueManager dialogueManager;
     TTF_Font* font;
     SDL_Texture* dialogueTextTexture;

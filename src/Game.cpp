@@ -12,6 +12,7 @@ tileMap(),
 tiledLevel(),
 player(),
 sign(640.0f,192.0f),
+bat(600.0f,400.0f,100),
 rat(720.0f, 192.0f, DialogueData{
     {
         "The dungeon goes deeper than you think.",
@@ -186,6 +187,19 @@ bool Game::Initialize() {
         return false;
     }
     eska.SetTexture(eskaTexture);
+
+    // Bat enemy texture
+    SDL_Texture* batTexture =
+        assetManager.LoadTexture(
+            renderer,
+            "../assets/enemies/bat/bat.bmp");
+
+    if (!batTexture) {
+        Shutdown();
+        return false;
+    }
+
+    bat.SetTexture(batTexture);
 
     // Old TileMap system
     //
@@ -362,6 +376,8 @@ void Game::Render() {
     for (NPC* npc: npcs) {
         npc->Render(renderer, camera.GetX(), camera.GetY());
     }
+
+    bat.Render(renderer, camera.GetX(), camera.GetY());
 
     player.Render(renderer, camera.GetX(), camera.GetY());
 

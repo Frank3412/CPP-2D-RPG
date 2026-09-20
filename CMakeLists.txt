@@ -30,6 +30,7 @@ add_executable(PracticeCode
         src/DialogueManager.cpp
         src/NPC.cpp
         src/TiledLevel.cpp
+        src/Enemy.cpp
 )
 
 target_include_directories(
