@@ -53,7 +53,7 @@
         {
          "columns":6,
          "firstgid":1,
-         "image":"dungeon_sprite_sheet.png",
+         "image":"dungeon_sprite_sheet.bmp",
          "imageheight":32,
          "imagewidth":192,
          "margin":0,

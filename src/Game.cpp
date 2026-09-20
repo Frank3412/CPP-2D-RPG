@@ -1,6 +1,6 @@
 #include "Game.h"
 #include "Constants.h"
-#include "TiledLevel.h"
+
 #include <vector>
 
 
@@ -9,6 +9,7 @@ Game::Game()
       renderer(nullptr),
 assetManager(),
 tileMap(),
+tiledLevel(),
 player(),
 sign(640.0f,192.0f),
 rat(720.0f, 192.0f, DialogueData{
@@ -62,6 +63,7 @@ bool Game::Initialize() {
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
         0);
+
     if (!window) {
         SDL_Log("Failed to create window: %s", SDL_GetError());
         SDL_Quit();
@@ -136,6 +138,7 @@ bool Game::Initialize() {
         Shutdown();
         return false;
     }
+
     player.SetAnimationTextures(
         walkLeft,
         walkDown,
@@ -146,6 +149,7 @@ bool Game::Initialize() {
         idleUp,
         idleRight);
 
+    // Sign texture
     SDL_Texture* signTexture =
         assetManager.LoadTexture(
             renderer,
@@ -183,6 +187,10 @@ bool Game::Initialize() {
     }
     eska.SetTexture(eskaTexture);
 
+    // Old TileMap system
+    //
+    // We are keeping this temporarily because
+    // Player collision and Camera still depend on it
     if (!tileMap.Initialize(renderer, assetManager)) {
         Shutdown();
         return false;
@@ -193,10 +201,14 @@ bool Game::Initialize() {
         return false;
     }
 
-    TiledLevel tiledLevel;
-
+    // New Tiled level system
     if (!tiledLevel.LoadMap(
         "../assets/maps/dungeon_hub_embedded.tmj")) {
+        Shutdown();
+        return false;
+    }
+
+    if (!tiledLevel.Initialize(renderer, assetManager)) {
         Shutdown();
         return false;
     }
@@ -236,11 +248,15 @@ void Game::Update(float deltaTime) {
                 npc->GetCollisionBox());
         }
 
+        // Temporary:
+        // Player collision still uses the old TileMap
         player.Update(
             deltaTime,
             tileMap,
             solidObjects);
 
+        // Temporary:
+        // Camera still uses the old TileMap dimensions
         camera.Update(
             player.GetRect(),
             tileMap);
@@ -264,7 +280,6 @@ void Game::Update(float deltaTime) {
             dialogueManager.AdvanceDialogue();
 
             if (dialogueManager.IsActive()) {
-
                 CreateDialogueTextTexture();
             }
             else {
@@ -336,8 +351,11 @@ void Game::Render() {
     SDL_SetRenderDrawColor(renderer, 40, 60, 100, 255);
     SDL_RenderClear(renderer);
 
+    // New Tiled level renderer
+    tiledLevel.Render(renderer,camera.GetX(), camera.GetY());
 
-    tileMap.Render(renderer, camera.GetX(), camera.GetY());
+    //Turned off tilemap portion and will delete it in the future
+    //tileMap.Render(renderer, camera.GetX(), camera.GetY());
 
     sign.Render(renderer, camera.GetX(), camera.GetY());
 
@@ -401,11 +419,13 @@ void Game::Run() {
     while (running) {
 
         Uint64 currentCounter = SDL_GetPerformanceCounter();
+
         // Make sure you divide by the frequency AFTER
         // subtracting the counters
         double deltaTime =
             static_cast<double>(currentCounter - previousCounter)/
                 SDL_GetPerformanceFrequency();
+
         previousCounter = currentCounter;
 
         ProcessInput();

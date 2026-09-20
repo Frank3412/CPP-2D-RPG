@@ -2,13 +2,16 @@
 
 #include "AssetManager.h"
 #include "TileMap.h"
+#include "TiledLevel.h"
 #include "Player.h"
 #include "Camera.h"
 #include "Sign.h"
 #include "NPC.h"
 #include "DialogueManager.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
+
 #include <vector>
 
 
@@ -25,7 +28,12 @@ private:
     SDL_Window* window;
     SDL_Renderer* renderer;
     AssetManager assetManager;
+
+    // Old map system
     TileMap tileMap;
+    // New Tiled map system
+    TiledLevel tiledLevel;
+
     Player player;
     Sign sign;
     NPC rat;

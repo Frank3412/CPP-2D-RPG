@@ -1,5 +1,10 @@
 #include "TiledLevel.h"
 
+#include "AssetManager.h"
+#include "Constants.h"
+
+#include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -11,11 +16,14 @@ TiledLevel::TiledLevel()
     : mapWidth(0),
 mapHeight(0),
 tileWidth(0),
-tileHeight(0)
+tileHeight(0),
+mapDirectory(),
+tilesetTexture(nullptr)
 {
 }
 
 bool TiledLevel::LoadMap(const std::string& filename) {
+
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -41,6 +49,7 @@ bool TiledLevel::LoadMap(const std::string& filename) {
 
         return false;
     }
+
     if (!mapData.contains("width") ||
         !mapData.contains("height") ||
         !mapData.contains("tilewidth") ||
@@ -57,6 +66,10 @@ bool TiledLevel::LoadMap(const std::string& filename) {
     tileWidth = mapData["tilewidth"].get<int>();
     tileHeight = mapData["tileheight"].get<int>();
 
+    // Store the directory containing the .tmj file
+    std::filesystem::path mapPath(filename);
+    mapDirectory = mapPath.parent_path().string();
+
     layers.clear();
     tilesets.clear();
 
@@ -65,6 +78,7 @@ bool TiledLevel::LoadMap(const std::string& filename) {
         mapData["layers"].is_array()) {
 
         for (const auto& layerData : mapData["layers"]) {
+
             MapLayer layer;
 
             if (layerData.contains("name") &&
@@ -88,7 +102,7 @@ bool TiledLevel::LoadMap(const std::string& filename) {
                 layer.tileData =
                     layerData["data"].get<std::vector<int>>();
             }
-            layers.push_back(layer);
+            layers.push_back(std::move(layer));
         }
     }
 
@@ -135,6 +149,14 @@ bool TiledLevel::LoadMap(const std::string& filename) {
                tilesetData["tilecount"].is_number_integer()) {
                 tileset.tileCount = tilesetData["tilecount"].get<int>();
                }
+            if (tilesetData.contains("margin") &&
+               tilesetData["margin"].is_number_integer()) {
+                tileset.margin = tilesetData["margin"].get<int>();
+               }
+            if (tilesetData.contains("spacing") &&
+               tilesetData["spacing"].is_number_integer()) {
+                tileset.spacing = tilesetData["spacing"].get<int>();
+               }
             tilesets.push_back(tileset);
         }
     }
@@ -175,6 +197,160 @@ bool TiledLevel::LoadMap(const std::string& filename) {
     << '\n';
 
     return true;
+}
+
+bool TiledLevel::Initialize(
+    SDL_Renderer* renderer,
+    AssetManager& assetManager) {
+
+    if (tilesets.empty()) {
+
+        SDL_Log("TiledLevel contains no tilesets.");
+        return false;
+    }
+
+    // Stage C currently supports one tileset
+    const TileSetInfo& tileset = tilesets.front();
+
+    if (tileset.image.empty()) {
+        SDL_Log("TiledLevel tileset does not contain an image.");
+        return false;
+    }
+
+    std::filesystem::path imagePath =
+        std::filesystem::path(mapDirectory)
+    / tileset.image;
+
+    imagePath = imagePath.lexically_normal();
+
+    tilesetTexture =
+        assetManager.LoadTexture(
+            renderer,
+            imagePath.string().c_str());
+
+    if (!tilesetTexture) {
+
+        SDL_Log("Failed to load Tiled tileset image: %s",
+            imagePath.string().c_str());
+        return false;
+    }
+
+    return true;
+
+}
+
+void TiledLevel::Render(
+    SDL_Renderer* renderer,
+    float cameraX,
+    float cameraY) const {
+
+    if (tilesetTexture == nullptr ||
+        tilesets.empty()) {
+        return;
+    }
+
+    const TileSetInfo& tileset = tilesets.front();
+
+    if (tileset.columns <= 0 ||
+        tileset.tileWidth <= 0 ||
+        tileset.tileHeight <= 0) {
+        return;
+    }
+
+    for (const MapLayer& layer: layers) {
+
+        if (layer.type != "tilelayer") {
+            continue;
+        }
+        if (layer.width <= 0 ||
+            layer.height <= 0) {
+            continue;
+        }
+
+        const int firstColumn =
+            std::max(0, static_cast<int>(cameraX/tileWidth));
+
+        const int firstRow =
+            std::max(0, static_cast<int>(cameraY/tileHeight));
+
+        const int visibleColumns =
+            (WINDOW_WIDTH/tileWidth)+2;
+
+        const int visibleRows =
+            (WINDOW_HEIGHT/tileHeight)+2;
+
+        const int lastColumn =
+            std::min(layer.width, firstColumn+visibleColumns);
+
+        const int lastRow = std::min(layer.height,
+            firstRow + visibleRows);
+
+        for (int row = firstRow; row < lastRow; ++row) {
+
+            for (int column = firstColumn; column < lastColumn; ++column) {
+
+                const int dataIndex = row * layer.width + column;
+
+                if (dataIndex < 0 || dataIndex >=
+                    static_cast<int>(layer.tileData.size())) {
+                    continue;
+                }
+
+                const int gid = layer.tileData[dataIndex];
+
+                // GID 0 means empty tile.
+                if (gid ==0) {
+                    continue;
+                }
+
+                // Stage C currently supports
+                // normal, non-flipped GIDs
+                if (gid < tileset.firstGid) {
+                    continue;
+                }
+
+                const int localTiledID = gid - tileset.firstGid;
+
+                if (localTiledID < 0 || localTiledID >=
+                    tileset.tileCount) {
+                    continue;
+                }
+
+                const int sourceColumn =
+                    localTiledID % tileset.columns;
+
+                const int sourceRow =
+                    localTiledID / tileset.columns;
+
+                const float sourceX =
+                    static_cast<float>(
+                        tileset.margin + sourceColumn * (
+                            tileset.tileWidth+tileset.spacing));
+
+                const float sourceY =
+                    static_cast<float>(tileset.margin + sourceRow *
+                        (tileset.tileHeight+tileset.spacing));
+
+                SDL_FRect sourceRect{
+                sourceX,
+                sourceY,
+                static_cast<float>(tileset.tileWidth),
+                static_cast<float>(tileset.tileHeight)};
+
+                SDL_FRect destinationRect{
+                static_cast<float>(column*tileWidth)-cameraX,
+                static_cast<float>(row*tileHeight)-cameraY,
+                static_cast<float>(tileWidth),
+                static_cast<float>(tileHeight)};
+
+                SDL_RenderTexture(
+                    renderer,
+                    tilesetTexture,
+                    &sourceRect,
+                    &destinationRect);
+            }
+        }
+    }
 }
 
 int TiledLevel::GetWidth() const {
