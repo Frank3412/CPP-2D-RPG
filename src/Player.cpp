@@ -70,7 +70,7 @@ void Player::Update(
     float movementX = 0.0f;
     float movementY = 0.0f;
 
-    // 1. Calculate the raw step distance for this exact frame
+    // 1. Calculate movement
     if (keyboardStates[SDL_SCANCODE_UP]) {
         movementY -= speed * deltaTime;
         direction = Direction::Up;
@@ -101,6 +101,7 @@ void Player::Update(
         animationState = AnimationState::Idle;
     }
 
+    // 2. Update animation
     if (isMoving) {
         animationTimer += deltaTime;
 
@@ -124,15 +125,13 @@ void Player::Update(
         }
     }
 
-    // 2. Map boundary check *before* modifying position to prevent
-    // sticking
-    // Creating a temporary rectangle representing where the player
-    // wants to go
+    // 3. Calculate the player's next position
+
     SDL_FRect nextRect = rect;
     nextRect.x += movementX;
     nextRect.y += movementY;
 
-    // Hard boundary clamps on the temporary prediction path
+    // 4. Keep the player inside the current world boundaries
     if (nextRect.x < 0.0f) {
         nextRect.x = 0.0f;
     }
@@ -146,46 +145,40 @@ void Player::Update(
         nextRect.y = tileMap.GetWorldHeight() - nextRect.h;
     }
 
-    // 3. Axis-separated title collisions to maintain smooth wall
-    // sliding
-    // Test X Axis movement safely
+    // 5. Object collision only
+    //
+    // Tile collision is intentionally disabled for now
+    // The new Tiled level will eventually provide its own
+    // collision information
+
     SDL_FRect testX = GetCollisionBox();
     testX.x += movementX;
 
-    bool blockedX = tileMap.CheckCollision(testX);
+    bool blockedX = false;
 
-    if (!blockedX) {
-        for (const SDL_FRect& solidObject:solidObjects) {
-            if (SDL_HasRectIntersectionFloat(
-                &testX,
-                &solidObject)){
-
-                blockedX = true;
-                break;
-                }
+    for (const SDL_FRect& solidObject:solidObjects) {
+        if (SDL_HasRectIntersectionFloat(&testX, &solidObject)) {
+            blockedX = true;
+            break;
         }
     }
+
     if (!blockedX) {
         rect.x = nextRect.x;
     }
 
-    // Test Y Axis movement safely
+    // Test Y axis
     SDL_FRect testY = GetCollisionBox();
     testY.y += movementY;
 
-    bool blockedY = tileMap.CheckCollision(testY);
+    bool blockedY = false;
 
-    if (!blockedY) {
-
-        for (const SDL_FRect& solidObject:solidObjects) {
-            if (SDL_HasRectIntersectionFloat(
-                &testY,
-                &solidObject)) {
-                blockedY = true;
-                break;
-            }
-        }
-    }
+   for (const SDL_FRect& solidObject:solidObjects) {
+       if (SDL_HasRectIntersectionFloat(&testY, &solidObject)) {
+           blockedY = true;
+           break;
+       }
+   }
     if (!blockedY) {
         rect.y = nextRect.y;
     }
